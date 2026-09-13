@@ -1,0 +1,7 @@
+# Meeting 5: Concept Correction & Domain Pivot
+
+**Goal:** The purpose of this meeting was to conduct a critical conceptual evaluation following detailed feedback from our tutor, specifically addressing theoretical misconceptions regarding participant behaviors and user pain points.
+  
+**Decisions:** An in-depth review with the tutor revealed a fundamental flaw in our original terminology: the recurring user dilemma ("I want to stop playing, but my teammates want to continue, and I don't want to let them down") does not represent clinical or psychological game addiction. Instead, this involuntary persistence is an explicit manifestation of **social compliance** and **social compulsion**, where individuals subordinate personal agency to avoid relational discord or social guilt. Rather than completely dismantling our prior investigative efforts, the team decisively pivoted our core domain from "game addiction" to **social compliance**. This strategic recontextualization maintains the validity of all gathered empirical data while establishing sound theoretical rigor for subsequent engineering and design phases.
+  
+**Future Plans:** With our domain precisely defined around interpersonal compliance, the team will design follow-up user evaluations to pinpoint specific functional friction points, map detailed user journeys, and establish concrete functional requirements for the forthcoming interactive prototype.

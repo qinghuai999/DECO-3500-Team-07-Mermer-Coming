@@ -1,0 +1,7 @@
+# Meeting 3: Interview Protocol Design
+
+**Goal:** The objective was to design a comprehensive qualitative interview protocol tailored to our refined domain, ensuring inquiries effectively probe player motivations, session boundaries, and everyday cessation dilemmas.
+  
+**Decisions:** After extensive group deliberation, the team concluded that approaching users immediately with heavy questions regarding compulsive habits could introduce bias and defensive responses. Consequently, we adopted a progressive broad-to-narrow inquiry strategy. The protocol will open with broad discussions concerning personal gaming routines, typical platforms, favorite multiplayer titles, and average session durations. From there, questions will gently transition toward session management: what factors prompt a player to log off, what causes sessions to unexpectedly prolong, and how individuals navigate the transition from playing to stopping. This funnel structure allows participants to feel comfortable while giving researchers room to identify organic friction points in their daily habits.
+  
+**Future Plans:** The team will finalize the participant screening criteria, schedule individual user interview sessions, and begin gathering primary qualitative data. Following the interview cycle, we will aggregate verbatim notes, perform thematic affinity diagramming, and extract recurring patterns to narrow our design scope.

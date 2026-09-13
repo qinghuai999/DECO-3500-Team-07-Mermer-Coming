@@ -1,0 +1,7 @@
+# Meeting 2: Feasibility & Scope Alignment
+
+**Goal:** The overarching goal of this meeting was to critically validate the feasibility of our chosen topic, clarify the boundary between clinical conditions and behavioral design, and align our core trajectory directly with the professor’s academic guidance.  
+  
+**Decisions:** Following an extensive consultation with the professor, the team dissected how addiction ought to be conceptualized within the framework of mobile interaction and social dynamics. We arrived at a pivotal alignment: our project must not attempt to act as a clinical intervention or diagnose severe behavioral pathology, as such goals lie beyond design engineering. Instead, we explicitly established our design tone as investigating the behavioral friction and social contexts embedded within prolonged gaming. The focus shifted toward understanding how shared gameplay influences human connection and exploring ways to transform or facilitate healthier, more positive social experiences. This shift ensures our outcomes remain grounded, ethically responsible, and practical within the course guidelines.
+  
+**Future Plans:** Leveraging this clarified framework, the team will synthesize the professor's feedback and translate theoretical insights into practical research instruments. Our immediate action item is to formulate targeted interview guides and qualitative inquiry protocols that capture authentic interpersonal experiences rather than medicalized addiction metrics.

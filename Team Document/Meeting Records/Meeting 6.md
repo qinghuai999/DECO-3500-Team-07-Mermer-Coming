@@ -1,0 +1,7 @@
+# Meeting 6: Second-Round User Research Design
+
+**Goal:** The goal was to establish a refined user research framework and formulate targeted study questions informed by our domain pivot to social compliance and an expanded secondary literature review.
+  
+**Decisions:** Grounded in a secondary sweep of literature on group dynamics, the team delineated three distinct behavioral vectors for our next research phase. First, we will examine the acute exit barrier—why participants struggle to disengage when a team demands another round. Second, we incorporated findings on implicit power dynamics: frequent gaming groups often develop an informal "leader" who unilaterally determines game titles, roster composition, and session length, frequently leaving peripheral members feeling uncomfortable, marginalized, or hesitant to voice dissent. Third, we identified post-game communication barriers where players suppress constructive feedback or emotional frustrations about peer performance to maintain social harmony. We synthesized these three pillars into our updated user research protocol.
+  
+**Future Plans:** The team will execute this second phase of user testing across targeted participant groups. The collected insights will be directly utilized to define our Minimum Viable Product (MVP) requirements, prioritize essential interactive features, and inform the wireframing phase of our design prototype.

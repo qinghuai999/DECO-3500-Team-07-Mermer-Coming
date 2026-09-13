@@ -1,0 +1,7 @@
+# Meeting 4: Findings Analysis & Pitch Preparation
+
+**Goal:** The primary purpose of this meeting was to synthesize qualitative evidence gathered from our initial user interviews and collaboratively construct the presentation deck for the upcoming pitch milestone.
+  
+**Decisions:** Through systematic thematic synthesis of our interview transcripts, we uncovered a compelling behavioral insight: excessive playtime is frequently not driven by an individual’s internal craving to continue, but rather by acute peer pressure and interpersonal obligations. Numerous interviewees reported wanting to stop after a match, but felt paralyzed by the fear of disappointing their squad, letting down close friends, or appearing antisocial in front of less familiar gaming partners. Recognizing this social friction as our primary design opportunity, the team developed a five-slide pitch deck covering the refined problem definition, core stakeholder profiles, market analysis of existing digital well-being apps, and our proposed design value proposition.
+  
+**Future Plans:** The team will rehearse the presentation to ensure seamless timing, present the pitch during the formal review session, and carefully record feedback from instructors and peers to further sharpen our problem statement and design requirements.
