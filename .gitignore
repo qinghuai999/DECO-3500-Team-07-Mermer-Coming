@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Local environment and credentials (keep placeholder templates)
+.env
+.env.*
+!.env.sample
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs, caches, and generated output
+*.log
+coverage/
+.nyc_output/
+.cache/
+dist/
+build/
+*.tsbuildinfo
+
+# OS and local editor files
+.DS_Store
+._*
+Thumbs.db
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
