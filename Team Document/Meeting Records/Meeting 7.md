@@ -22,3 +22,5 @@
     
 **Future Plans:** 
   With the three core features clearly defined, the team's immediate next milestone is to build the Minimum Viable Product (MVP) and develop functional interactive prototypes. Once the MVP is assembled, we will run a round of user testing to evaluate usability, assess how naturally these features reduce social tension, and refine the interactions based on user feedback.  
+  
+Figma Link for Affinity Diagram: https://www.figma.com/design/bkTerRvEpQk8kcDHnVnPAx/DECO3500?node-id=32-268&t=6xP3IZnJYBhvTwnB-0 
