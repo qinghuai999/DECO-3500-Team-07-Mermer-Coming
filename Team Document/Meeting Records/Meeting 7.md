@@ -1,7 +1,7 @@
 # Meeting 7: Affinity Diagramming & Feature Ideation
 
 **Goal:** 
-  The primary goal of this meeting was to analyze the qualitative data from our second round of user interviews using an affinity diagram, validate our previous behavioral hypotheses, and translate the core user pain points into three concrete, practical feature concepts for our upcoming product.  
+  The primary goal of this meeting was to analyze the qualitative data from our second round of user interviews using an affinity diagram, validate various possible directions we concluded from researches and articles, and translate the core user pain points into three concrete, practical feature concepts for our upcoming product.  
   
 **Decisions:** 
   Following the previous session where we identified three main friction points surrounding social compliance and peer pressure in multiplayer gaming groups, we conducted targeted interviews to explore these dynamics. The resulting affinity diagram confirmed that our initial assumptions aligned closely with genuine player experiences:  
