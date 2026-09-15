@@ -11,11 +11,8 @@ const TEST_COMMAND = {
 
 const EXCUSE_COMMAND = {
   name: 'excuse',
-  description: 'Send a ridiculous excuse to leave the game',
-  description_localizations: {
-    'zh-CN': '生成一条夸张借口，幽默地宣布要下线休息',
-    'zh-TW': '產生一條誇張藉口，幽默地宣布要下線休息',
-  },
+  description: 'Preview a playful exit message, then choose whether to send it',
+  description_localizations: null,
   type: 1,
   integration_types: [0, 1],
   contexts: [0, 1, 2],
@@ -24,10 +21,7 @@ const EXCUSE_COMMAND = {
 const SOCIAL_COMMAND = {
   name: 'social',
   description: 'Show the social panel without publicly identifying who opened it',
-  description_localizations: {
-    'zh-CN': '调出社交面板，不公开显示触发者',
-    'zh-TW': '叫出社交面板，不公開顯示觸發者',
-  },
+  description_localizations: null,
   type: 1,
   integration_types: [0],
   contexts: [0],

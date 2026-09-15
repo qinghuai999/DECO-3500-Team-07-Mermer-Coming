@@ -7,7 +7,7 @@ const update = content => ({ type: 7, data: { content, components: [], allowed_m
 
 // Only private drafts live in memory. Restarts invalidate drafts, never the panel.
 // Multiplayer sessions will require durable storage in the next implementation.
-export function createInteractions({ api, resultChannelId, guildId, now = Date.now, randomExcuse = getRandomExcuse }) {
+export function createInteractions({ api, resultChannelId, guildId, portrait = null, now = Date.now, randomExcuse = getRandomExcuse }) {
   const drafts = new Map();
   const socialRequests = new Map();
   const lifetime = 10 * 60 * 1000;
@@ -86,8 +86,13 @@ export function createInteractions({ api, resultChannelId, guildId, now = Date.n
     if (body.type === 2 && body.data?.name === 'social') return social(body);
     const action = body.data?.custom_id;
     if ((body.type === 2 && body.data?.name === 'excuse') || action === PANEL_ACTIONS.exit) return start(body);
-    if (action === PANEL_ACTIONS.portrait) return { response: privateReply('🎨 Collaborative Portrait is coming soon. No activity has started, and your click has not been announced.') };
-    if (action === PANEL_ACTIONS.picker) return { response: privateReply('🎲 Random Picker is coming soon. No draw has started, and your click has not been announced.') };
+    if (action === PANEL_ACTIONS.portrait || action?.startsWith('mermer:portrait:')) {
+      return portrait ? portrait.handle(body) : { response: privateReply('Player Portrait is not configured yet. Ask the developer to set up the game voice channel.') };
+    }
+    if (action === PANEL_ACTIONS.picker) {
+      const error = portrait?.eligibility(body);
+      return { response: privateReply(error || '🎲 Random Picker is coming soon. No draw has started, and your click has not been announced.') };
+    }
     const match = /^mermer:exit:(send|another|cancel):([a-f0-9]{24})$/.exec(action ?? '');
     if (!match) return { response: privateReply('This button is no longer supported. Please use the control panel.') };
     const [, operation, id] = match;
@@ -116,7 +121,7 @@ export function createInteractions({ api, resultChannelId, guildId, now = Date.n
         let content;
         try {
           await api(`channels/${draft.targetChannel}/messages`, { method: 'POST', body: {
-            content: `<@${draft.owner}> 不得不暂时下线：\n> ${draft.text}\n-# 不是不想玩，是宇宙不让。`,
+            content: `🎭 <@${draft.owner}> is signing off for now!\n> ${draft.text}\n-# I'd stay, but the universe has other plans.`,
             allowed_mentions: { parse: [], users: [draft.owner] },
             nonce: id, enforce_nonce: true,
           } });

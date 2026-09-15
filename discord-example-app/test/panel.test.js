@@ -159,12 +159,12 @@ test('another user cannot send a draft; expiration and restart invalidate old pr
   assert.equal(h.calls.length, 0);
 });
 
-test('multiplayer placeholders return private feedback without creating public activities', () => {
+test('unconfigured portrait and future picker return private feedback without creating public activities', () => {
   const { handle, calls } = featureHarness();
   for (const action of [PANEL_ACTIONS.portrait, PANEL_ACTIONS.picker]) {
     const response = handle(interaction(action)).response;
     assert.equal(response.data.flags, 64);
-    assert.match(response.data.content, /coming soon/);
+    assert.match(response.data.content, /coming soon|not configured/);
   }
   assert.equal(calls.length, 0);
 });

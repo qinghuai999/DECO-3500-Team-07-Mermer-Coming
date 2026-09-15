@@ -1,27 +1,102 @@
 [
-  { "id": 1, "text": "我的金鱼突然考上了驾校，现在正坐在方向盘后面等我当副驾。" },
-  { "id": 2, "text": "冰箱联合洗衣机宣布独立建国，我必须回去参加制宪会议。" },
-  { "id": 3, "text": "枕头发来最后通牒：再不睡觉就报警说我虐待床。" },
-  { "id": 4, "text": "邻居家的Wi-Fi说它今天过生日，要求所有设备静音一小时。" },
-  { "id": 5, "text": "我的影子提前下班了，没有它我在地图上会显示为失踪人口。" },
-  { "id": 6, "text": "键盘进水了，但进的是咖啡。它现在只肯打出“再来一杯”。" },
-  { "id": 7, "text": "月亮临时加班，需要我上去帮忙按开关。" },
-  { "id": 8, "text": "猫召开紧急董事会，全票通过“铲屎官即刻下线”议案。" },
-  { "id": 9, "text": "我被一碗面约谈了，它说如果我不去吃，就要报警说我遗弃主食。" },
-  { "id": 10, "text": "系统提示：今日社交电量已用完，将在 30 秒后强制进入省电模式。" },
-  { "id": 11, "text": "我家闹钟成立了工会，正在罢工，我得回去谈判工时。" },
-  { "id": 12, "text": "窗外那朵云说它认识我小学班主任，我必须立刻去对质。" },
-  { "id": 13, "text": "我的大脑缓存已满，需要重启。预计维护时间：一整个晚上。" },
-  { "id": 14, "text": "马桶盖传来密电：马桶精今晚召开地下派对，缺一个门神。" },
-  { "id": 15, "text": "我养的绿萝学会了走路，正准备离家出走，我得去追。" },
-  { "id": 16, "text": "游戏外的世界突然掉帧，我得去给现实打补丁。" },
-  { "id": 17, "text": "一只鸽子连啄了我的窗户三下，翻译软件显示：你妈叫你回家吃饭。" },
-  { "id": 18, "text": "我的椅子宣布它今天是椅子，不是电竞座舱，拒绝继续承重。" },
-  { "id": 19, "text": "耳机里突然出现天气预报：今晚有暴击，建议躺平躲避。" },
-  { "id": 20, "text": "我被一封来自明天的邮件预告了：如果你现在不下线，明天你会恨今天的自己。" },
-  { "id": 21, "text": "宿舍楼的电梯开始讲冷笑话，我必须下去把它劝回去。" },
-  { "id": 22, "text": "我的鼠标垫移民去了桌角，现在正在办理落地签，需要监护人到场。" },
-  { "id": 23, "text": "宇宙客服来电：检测到你的快乐值超额，请立即下线以免被征收娱乐税。" },
-  { "id": 24, "text": "我突然想起煤气没关。煤气是隐喻。隐喻是困。困是真的。" },
-  { "id": 25, "text": "队友们，我不是坑，我是被睡眠选中的人，今晚必须去完成主线任务：闭眼。" }
+  {
+    "id": 1,
+    "text": "My goldfish just got its learner's permit and needs me in the passenger seat."
+  },
+  {
+    "id": 2,
+    "text": "My fridge and washing machine have declared independence. I have to attend their first cabinet meeting."
+  },
+  {
+    "id": 3,
+    "text": "My pillow has issued a final warning: report to bed immediately or lose all blanket privileges."
+  },
+  {
+    "id": 4,
+    "text": "The Wi-Fi is celebrating its birthday and has requested an hour of silence from all connected devices."
+  },
+  {
+    "id": 5,
+    "text": "My shadow clocked out early. I need to catch it before it takes the last bus home."
+  },
+  {
+    "id": 6,
+    "text": "I spilled coffee on my keyboard. Now it will only type 'one more espresso'."
+  },
+  {
+    "id": 7,
+    "text": "The moon is short-staffed tonight. I've been called in to hold the flashlight."
+  },
+  {
+    "id": 8,
+    "text": "My cat called an emergency board meeting. The motion to log me off passed unanimously."
+  },
+  {
+    "id": 9,
+    "text": "My noodles have scheduled a mandatory meeting, and the agenda is getting soggy."
+  },
+  {
+    "id": 10,
+    "text": "My social battery has reached 1%. Emergency blanket mode is now activating."
+  },
+  {
+    "id": 11,
+    "text": "My alarm clocks have formed a union. I need to negotiate a later starting time."
+  },
+  {
+    "id": 12,
+    "text": "A cloud outside claims it knows my primary school teacher. I need to investigate."
+  },
+  {
+    "id": 13,
+    "text": "My brain's cache is full. Scheduled maintenance will take approximately one entire night."
+  },
+  {
+    "id": 14,
+    "text": "The bathroom ducks are hosting a secret disco, and apparently I'm the designated DJ."
+  },
+  {
+    "id": 15,
+    "text": "My houseplant has learned to walk and is making a break for the front door."
+  },
+  {
+    "id": 16,
+    "text": "Reality is dropping frames. I need to step outside and install a patch."
+  },
+  {
+    "id": 17,
+    "text": "A pigeon tapped on my window. The translation app says my dinner is getting cold."
+  },
+  {
+    "id": 18,
+    "text": "My chair has ended its shift and refuses to provide any more competitive seating."
+  },
+  {
+    "id": 19,
+    "text": "My headset just forecast a severe pillow storm. I'm heading to bed for shelter."
+  },
+  {
+    "id": 20,
+    "text": "Tomorrow-me sent an email asking today-me to log off before we both regret it."
+  },
+  {
+    "id": 21,
+    "text": "The lift in my building has started telling dad jokes. I need to talk it down."
+  },
+  {
+    "id": 22,
+    "text": "My mouse pad has relocated to the edge of the desk and needs help with its visa paperwork."
+  },
+  {
+    "id": 23,
+    "text": "Galactic customer service says I've exceeded my daily fun allowance and must log off for an audit."
+  },
+  {
+    "id": 24,
+    "text": "My duvet has challenged me to a boss fight. The only available move is sleep."
+  },
+  {
+    "id": 25,
+    "text": "Sleep has chosen me for tonight's main quest: close both eyes and remain offline."
+  }
 ]

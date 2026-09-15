@@ -4,6 +4,7 @@ import { generateKeyPairSync, sign } from 'node:crypto';
 import { once } from 'node:events';
 import { createApp } from '../app.js';
 import { PANEL_ACTIONS } from '../panel.js';
+import { createPortrait } from '../portrait.js';
 
 test('signed HTTP interactions support a private preview and deferred confirmation; unsigned requests fail', async () => {
   const keys = generateKeyPairSync('ed25519');
@@ -11,12 +12,19 @@ test('signed HTTP interactions support a private preview and deferred confirmati
   const writes = [];
   let finishDelivery;
   const delivered = new Promise(resolve => { finishDelivery = resolve; });
-  const app = createApp({ publicKey, guildId: '111111111111111111', resultChannelId: '333333333333333333',
-    api: async (path, options) => {
+  const api = async (path, options) => {
       writes.push({ path, ...options });
       if (options.method === 'PATCH') finishDelivery();
       return { id: '444444444444444444' };
-    },
+  };
+  let clock = 100_000, endRound;
+  const portrait = createPortrait({ api, guildId: '111111111111111111', textChannelId: '222222222222222222',
+    voiceChannelId: '333333333333333333', now: () => clock,
+    roster: { snapshot: () => ({ ready: true, ids: ['777777777777777777'] }), subscribe: () => () => {} },
+    store: { load: () => ({ seen: [], active: null }), save: () => {} },
+    schedule: fn => { endRound = fn; return 1; }, unschedule: () => {},
+  });
+  const app = createApp({ publicKey, guildId: '111111111111111111', resultChannelId: '333333333333333333', api, portrait,
   });
   const server = app.listen(0, '127.0.0.1');
   try {
@@ -56,7 +64,22 @@ test('signed HTTP interactions support a private preview and deferred confirmati
     assert.equal(writes[2].path, 'channels/222222222222222222/messages');
     assert.equal(writes[2].body.components[0].components.length, 3);
     assert.equal(JSON.stringify(writes[2].body).includes(base.member.user.id), false);
+    const portraitDone = new Promise(resolve => { finishDelivery = resolve; });
+    assert.deepEqual(await post({ ...base, id: '999999999999999998', data: { custom_id: PANEL_ACTIONS.portrait } }),
+      { type: 5, data: { flags: 64 } });
+    await portraitDone;
+    assert.equal(writes[4].path, 'channels/222222222222222222/messages');
+    assert.equal(writes[4].body.interaction_metadata, undefined);
+    const open = writes[4].body.components[0].components[0].custom_id;
+    const chooser = await post({ ...base, data: { custom_id: open } });
+    assert.equal(chooser.data.flags, 64);
+    assert.equal((await post({ ...base, data: { custom_id: chooser.data.components[0].components[0].custom_id, values: ['lucky'] } })).type, 7);
+    clock += 10_000;
+    await endRound();
+    assert.match(writes.at(-1).body.content, /lucky/);
+    assert.deepEqual(writes.at(-1).body.components, []);
   } finally {
+    portrait.dispose();
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
   }

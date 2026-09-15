@@ -23,12 +23,20 @@ Discord 置顶消息不会一直悬浮在聊天窗口顶部。推荐创建独立
 
 当前由开发者独自调试：先将本次代码提交并推送到团队仓库的 `kiki_develop`，让现有 EC2 和机器人运行开发版。验收后再通过 PR 合并 `main`。在 **EC2 Session Manager 终端**执行（已有未提交修改时先处理，勿强制覆盖）：
 
+Session Manager 新会话可能默认使用 `ssm-user`，而项目与运行配置属于 `ec2-user`。先单独执行以下命令，切换后再粘贴后续命令：
+
 ```bash
-cd ~/DECO-3500-Team-07-Mermer-Coming
-git fetch origin
-git switch kiki_develop
-git pull --ff-only origin kiki_develop
-cd discord-example-app
+sudo -iu ec2-user
+```
+
+然后进入项目目录。各步骤使用 `&&`，前一步失败就不会继续构建：
+
+```bash
+cd /home/ec2-user/DECO-3500-Team-07-Mermer-Coming &&
+git fetch origin &&
+git switch kiki_develop &&
+git pull --ff-only origin kiki_develop &&
+cd discord-example-app &&
 sudo docker build -t mermer-bot:node24 .
 ```
 
