@@ -44,32 +44,20 @@ sudo docker build -t mermer-bot:node24 .
 
 编辑现有服务器配置，保留已有 APP_ID、PUBLIC_KEY、DISCORD_TOKEN 等内容：
 
-```bash
-nano /home/ec2-user/mermer-runtime/bot.env
-```
-
-补充以下配置，把中文占位内容换成真实 ID，等号后不要留空格：
-
-```dotenv
-GUILD_ID=服务器ID
-PANEL_CHANNEL_ID=面板频道ID
-RESULT_CHANNEL_ID=游戏聊天频道ID
-```
-
-不配置 `RESULT_CHANNEL_ID` 时，结果发送到点击按钮所在频道，会逐渐挤走面板，因此推荐单独设置结果频道。两个频道都应位于 `GUILD_ID` 对应服务器。配置与 token 留在服务器运行目录，不提交 Git。
-
 ## 3. 更新机器人容器
 
 先保留旧容器用于回退。以下备份名称如果已存在，需要换一个未使用的名称：
 
 ```bash
-sudo docker stop mermer-bot
-sudo docker rename mermer-bot mermer-bot-before-panel
+mermer_backup="mermer-bot-backup-$(date +%Y%m%d-%H%M%S)" &&
+sudo docker stop mermer-bot &&
+sudo docker rename mermer-bot "$mermer_backup" &&
 sudo docker run -d \
   --name mermer-bot \
   --network mermer-net \
   --restart unless-stopped \
   --env-file /home/ec2-user/mermer-runtime/bot.env \
+  -v mermer-data:/app/data \
   -p 127.0.0.1:3000:3000 \
   --log-opt max-size=10m \
   --log-opt max-file=3 \
@@ -79,8 +67,8 @@ sudo docker run -d \
 检查机器人已启动及 HTTPS 仍正常：
 
 ```bash
-sudo docker logs --tail 30 mermer-bot
-curl -fsS https://mermerteam07.duckdns.org/
+sudo docker logs --tail 50 mermer-bot
+curl -i https://mermerteam07.duckdns.org/
 ```
 
 预期显示 `Listening on port 3000` 和 `ok`。Caddy 与 Discord 的 Interactions Endpoint URL 保持现有配置。
