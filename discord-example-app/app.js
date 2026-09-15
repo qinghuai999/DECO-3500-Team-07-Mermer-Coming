@@ -12,10 +12,10 @@ import { discordApi } from './discord-api.js';
 import { createInteractions } from './interactions.js';
 import { createPortraitRuntime } from './portrait-runtime.js';
 
-export function createApp({ api = discordApi, publicKey = process.env.PUBLIC_KEY, portrait = null,
+export function createApp({ api = discordApi, publicKey = process.env.PUBLIC_KEY, portrait = null, picker = null,
   resultChannelId = process.env.RESULT_CHANNEL_ID, guildId = process.env.GUILD_ID } = {}) {
   const app = express();
-  const handleInteraction = createInteractions({ api, resultChannelId, guildId, portrait });
+  const handleInteraction = createInteractions({ api, resultChannelId, guildId, portrait, picker });
 
   app.get('/', function (_req, res) {
     return res.send('ok');
@@ -77,9 +77,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const PORT = process.env.PORT || 3000;
   let runtime;
   try { runtime = createPortraitRuntime({ api: discordApi }); }
-  catch { console.error('Player Portrait disabled: check the state volume and channel configuration.'); }
-  const server = createApp({ portrait: runtime?.portrait }).listen(PORT, '0.0.0.0', () => console.log('Listening on port', PORT));
-  runtime?.start().catch(() => console.error('Player Portrait could not recover its state.'));
+  catch { console.error('Multiplayer features disabled: check the state volume and channel configuration.'); }
+  const server = createApp({ portrait: runtime?.portrait, picker: runtime?.picker }).listen(PORT, '0.0.0.0', () => console.log('Listening on port', PORT));
+  runtime?.start().catch(() => console.error('Multiplayer features could not recover their state.'));
   for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => {
     runtime?.stop();
     server.close();

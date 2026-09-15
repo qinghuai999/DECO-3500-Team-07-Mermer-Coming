@@ -13,7 +13,7 @@ const A = '100000000000000010', B = '100000000000000011', C = '10000000000000001
 let nextId = 100000000000000100n;
 function body(action = 'mermer:panel:portrait', user = B, values) {
   return { id: String(nextId++), type: 3, guild_id: guildId, channel_id: textChannelId,
-    application_id: '100000000000000020', token: 'private-test-token',
+    application_id: '100000000000000020', token: `private-test-token-${nextId}`,
     member: { user: { id: user } }, data: { custom_id: action, ...(values ? { values } : {}) } };
 }
 function harness({ saved, apiHook, saveHook } = {}) {
@@ -45,7 +45,9 @@ function harness({ saved, apiHook, saveHook } = {}) {
     },
     open(user = B) {
       const prompt = calls.findLast(call => call.method === 'POST');
-      return portrait.handle(body(prompt.body.components[0].components[0].custom_id, user)).response;
+      const opened = portrait.handle(body(prompt.body.components[0].components[0].custom_id, user));
+      void opened.afterReply?.();
+      return opened.response;
     },
   };
 }
@@ -99,32 +101,79 @@ test('anonymous start is acknowledged before publishing; simultaneous and replay
   assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
 });
 
-test('private self-evaluation, refresh, one final word, late click and neutral blanks obey a fixed 10-second deadline', async () => {
+test('refresh is allowed only before immediate submission; late private controls are removed', async () => {
   const h = harness();
   await h.start();
   let view = h.open(A);
   assert.equal(view.data.flags, 64);
   const stale = select(view);
-  view = h.portrait.handle(body(select(view), A, ['lucky'])).response;
-  assert.equal(view.type, 7);
-  assert.match(h.portrait.handle(body(stale, A, ['steady'])).response.data.content, /most recently/);
   const deadline = [...h.tasks][0].due;
   await h.advance(9000);
   view = h.portrait.handle(body(refresh(view), A)).response;
   assert.equal([...h.tasks][0].due, deadline);
-  assert.match(view.data.content, /lucky/); // Refresh keeps the current selection.
+  assert.match(h.portrait.handle(body(stale, A, ['steady'])).response.data.content, /most recently/);
   assert.match(h.portrait.handle(body(select(view), A, ['injected'])).response.data.content, /displayed words/);
   assert.match(h.portrait.handle(body(select(view), A, ['clutch', 'creative'])).response.data.content, /displayed words/);
-  view = h.portrait.handle(body(select(view), A, ['creative'])).response;
   const late = select(view);
+  const submission = h.portrait.handle(body(late, A, ['creative']));
+  assert.equal(submission.response.type, 7);
+  assert.match(submission.response.data.content, /Submitted/);
+  assert.deepEqual(submission.response.data.components, []);
+  await submission.afterReply();
+  assert.match(h.portrait.handle(body(late, A, ['clutch'])).response.data.content, /Submitted/);
   await h.advance(1000);
   assert.match(result(h).body.content, /creative/);
-  assert.doesNotMatch(result(h).body.content, /lucky/);
-  assert.deepEqual(result(h).body.components, []);
-  assert.match(h.portrait.handle(body(late, A, ['clutch'])).response.data.content, /closed/);
+  assert.doesNotMatch(result(h).body.content, /clutch/);
+  const expired = h.portrait.handle(body(late, A, ['clutch'])).response;
+  assert.equal(expired.type, 7);
+  assert.deepEqual(expired.data.components, []);
+  assert.match(expired.data.content, /closed/);
+});
+
+test('solo submission ends immediately and all opened private panels are closed', async () => {
+  const h = harness();
+  h.change([A]);
+  await h.start(A);
+  h.open(A);
+  const latest = h.open(A);
+  const posted = h.portrait.handle(body(select(latest), A, ['steady']));
+  await posted.afterReply();
+  assert.match(result(h).body.content, /steady/);
+  assert.equal(h.tasks.size, 0);
+  assert.equal(h.state().active, null);
+  const cleaned = h.calls.filter(call => call.path.startsWith('webhooks/') && /Submitted/.test(call.body.content));
+  assert.equal(cleaned.length, 2);
+  assert.ok(cleaned.every(call => call.body.components.length === 0 && !call.body.content.includes('<t:')));
+});
+
+test('multiplayer ends after everyone submits; timeouts close unanswered private panels without public counts', async () => {
+  const h = harness();
   await h.start();
+  const a = h.open(A), b = h.open(B);
+  await h.portrait.handle(body(select(a), A, ['steady'])).afterReply();
+  assert.equal(result(h), undefined);
+  await h.portrait.handle(body(select(b), B, ['lucky'])).afterReply();
+  assert.equal(h.tasks.size, 0);
+  assert.match(result(h).body.content, /steady/);
+  assert.match(result(h).body.content, /lucky/);
+  await h.start();
+  h.open(A); h.open(B);
   await h.advance(10_000);
   assert.match(result(h).body.content, /Intergalactic Loading Screen/);
+  const empty = h.calls.filter(call => /No word was submitted/.test(call.body.content));
+  assert.equal(empty.length, 2);
+  assert.ok(empty.every(call => call.path.startsWith('webhooks/') && call.body.components.length === 0));
+});
+
+test('opening a private selector at the deadline cannot leave a stale selector after its HTTP reply', async () => {
+  const h = harness();
+  await h.start();
+  const prompt = h.calls[0].body.components[0].components[0].custom_id;
+  const opening = h.portrait.handle(body(prompt, A));
+  await h.advance(10_000);
+  await opening.afterReply();
+  assert.match(h.calls.at(-1).body.content, /No word was submitted/);
+  assert.deepEqual(h.calls.at(-1).body.components, []);
 });
 
 test('new members wait until next round; leaving voters lose their word; target leaving cancels and unlocks', async () => {
@@ -206,13 +255,13 @@ test('state file is persistent, scoped and refuses corrupt data rather than sile
   } finally { rmSync(dir, { recursive: true }); }
 });
 
-test('main interaction router dispatches portrait buttons and restricts future picker to voice members', async () => {
+test('main interaction router dispatches portrait buttons and handles missing picker configuration', async () => {
   const h = harness();
   const handle = createInteractions({ api: h.config.api, guildId, portrait: h.portrait });
   const started = handle(body());
   assert.equal(started.response.type, 5);
   await started.afterReply();
-  assert.match(handle(body('mermer:panel:picker', C)).response.data.content, /Join/);
-  assert.match(handle(body('mermer:panel:picker', B)).response.data.content, /coming soon/);
+  assert.match(handle(body('mermer:panel:picker', C)).response.data.content, /not configured/);
+  assert.match(handle(body('mermer:panel:picker', B)).response.data.content, /not configured/);
   h.portrait.dispose();
 });

@@ -7,7 +7,7 @@ const update = content => ({ type: 7, data: { content, components: [], allowed_m
 
 // Only private drafts live in memory. Restarts invalidate drafts, never the panel.
 // Multiplayer sessions will require durable storage in the next implementation.
-export function createInteractions({ api, resultChannelId, guildId, portrait = null, now = Date.now, randomExcuse = getRandomExcuse }) {
+export function createInteractions({ api, resultChannelId, guildId, portrait = null, picker = null, now = Date.now, randomExcuse = getRandomExcuse }) {
   const drafts = new Map();
   const socialRequests = new Map();
   const lifetime = 10 * 60 * 1000;
@@ -89,9 +89,8 @@ export function createInteractions({ api, resultChannelId, guildId, portrait = n
     if (action === PANEL_ACTIONS.portrait || action?.startsWith('mermer:portrait:')) {
       return portrait ? portrait.handle(body) : { response: privateReply('Player Portrait is not configured yet. Ask the developer to set up the game voice channel.') };
     }
-    if (action === PANEL_ACTIONS.picker) {
-      const error = portrait?.eligibility(body);
-      return { response: privateReply(error || '🎲 Random Picker is coming soon. No draw has started, and your click has not been announced.') };
+    if (action === PANEL_ACTIONS.picker || action?.startsWith('mermer:picker:')) {
+      return picker ? picker.handle(body) : { response: privateReply('Random Picker is not configured yet. Ask the developer to set up the game voice channel.') };
     }
     const match = /^mermer:exit:(send|another|cancel):([a-f0-9]{24})$/.exec(action ?? '');
     if (!match) return { response: privateReply('This button is no longer supported. Please use the control panel.') };

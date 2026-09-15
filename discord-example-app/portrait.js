@@ -29,6 +29,39 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
   async function editPrivate(body, content) {
     await api(`webhooks/${body.application_id}/${body.token}/messages/@original`, { method: 'PATCH', body: closed(content) });
   }
+  function privateStatus(round, user) {
+    if (round.cancelReason) return 'This round has ended. Start a new Player Portrait from /social.';
+    if (round.submitted.has(user)) return `✅ Submitted: **${round.submitted.get(user)}**. ${round.status === 'open' ? 'Waiting for the other players.' : 'This round has ended.'}`;
+    return 'This round has ended. No word was submitted.';
+  }
+  async function cleanPanels(round, user) {
+    await Promise.all([...round.panels.values()].filter(panel => panel.ready && (!user || panel.user === user)).map(async panel => {
+      try { await editPrivate(panel, privateStatus(round, panel.user)); }
+      catch { report(); }
+    }));
+  }
+  function allSubmitted(round) {
+    const snapshot = roster.snapshot();
+    return snapshot.ready && snapshot.ids.includes(round.target)
+      && snapshot.ids.filter(id => round.participants.has(id)).every(id => round.submitted.has(id));
+  }
+  function privateView(round, user, body, initial) {
+    const rendered = view(round, user, initial);
+    let panel;
+    if (initial) {
+      panel = { application_id: body.application_id, token: body.token, user, ready: false };
+      round.panels.set(body.token, panel);
+    }
+    rendered.afterReply = async () => {
+      if (panel) panel.ready = true;
+      // The deadline can pass while the HTTP response is being delivered.
+      if (round.status !== 'open' || round.submitted.has(user)) {
+        if (panel) { try { await editPrivate(panel, privateStatus(round, user)); } catch { report(); } }
+        else await editPrivate(body, privateStatus(round, user));
+      }
+    };
+    return rendered;
+  }
   async function finish(round, reason) {
     if (active !== round || round.status !== 'open') return;
     round.status = 'closing';
@@ -37,6 +70,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     let content = reason;
     if (!content && !snapshot.ready) content = 'Player Portrait ended because the voice connection was interrupted. Please try again.';
     if (!content && !snapshot.ids.includes(round.target)) content = 'Player Portrait ended because the selected player left the game voice channel.';
+    round.cancelReason = content;
     if (!content) {
       const words = [...round.choices].filter(([user]) => snapshot.ids.includes(user)).map(([, word]) => word);
       const result = portraitText(words);
@@ -47,7 +81,9 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
       await api(`channels/${round.channel}/messages/${round.message}`, { method: 'PATCH', body: closed(content) });
     } catch { report(); }
     finally {
+      await cleanPanels(round);
       round.choices.clear(); round.views.clear();
+      round.panels.clear();
       active = null;
       try { save(); } catch { report(); }
     }
@@ -62,7 +98,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     if (snapshot.ready) for (const user of round.choices.keys()) {
       if (!snapshot.ids.includes(user)) round.choices.delete(user);
     }
-    if (round.status === 'open' && round.cancelReason) void finish(round, round.cancelReason).catch(report);
+    if (round.status === 'open' && (round.cancelReason || allSubmitted(round))) void finish(round, round.cancelReason).catch(report);
   });
 
   function start(body) {
@@ -78,7 +114,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     if (!pool.length) { seen = []; pool = ids; }
     const target = pool[choose(pool.length)];
     const round = { id: randomBytes(10).toString('hex'), channel: body.channel_id,
-      target, participants: new Set(ids), choices: new Map(), views: new Map(), status: 'preparing' };
+      target, participants: new Set(ids), choices: new Map(), submitted: new Map(), views: new Map(), panels: new Map(), status: 'preparing' };
     seen.push(target);
     active = round;
     try { save(); } catch { active = null; seen = previousSeen; report(); return reply('Player Portrait could not save its state. Please ask the developer to check the data volume.'); }
@@ -89,7 +125,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
         try {
           round.deadline = now() + 10_000;
           const message = await api(`channels/${round.channel}/messages`, { method: 'POST', body: {
-            content: `🎨 **Player Portrait: <@${target}>**\nChoose one word about this player's gameplay. The player can take part too!\nCloses <t:${Math.floor(round.deadline / 1000)}:R>. No selection is also fine.`,
+            content: `🎨 **Player Portrait: <@${target}>**\nChoose one word to submit immediately. The player can take part too!\nCloses when everyone submits, or <t:${Math.floor(round.deadline / 1000)}:R>. No selection is also fine.`,
             allowed_mentions: mentions, nonce: body.id, enforce_nonce: true,
             components: [{ type: 1, components: [{ type: 2, style: 1, label: 'Choose a Word', custom_id: `mermer:portrait:open:${round.id}` }] }],
           } });
@@ -124,15 +160,14 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
 
   function view(round, user, initial) {
     const current = round.views.get(user);
-    const selected = round.choices.get(user);
     return { response: { type: initial ? 4 : 7, data: {
       ...(initial ? { flags: 64 } : {}),
-      content: `🎨 Describe <@${round.target}>'s gameplay.\nCloses <t:${Math.floor(round.deadline / 1000)}:R>. Refresh does not extend the time.\nYour current word: **${selected ?? 'None'}**. Your latest choice is submitted automatically.`,
+      content: `🎨 Describe <@${round.target}>'s gameplay.\nChoose one word to submit immediately. You cannot change it after submitting.\nRefresh before choosing, or leave this blank. Closes <t:${Math.floor(round.deadline / 1000)}:R>.`,
       allowed_mentions: mentions,
       components: [
         { type: 1, components: [{ type: 3, custom_id: `mermer:portrait:select:${round.id}:${current.version}`,
-          placeholder: 'Choose one word (optional)', min_values: 0, max_values: 1,
-          options: WORD_GROUPS[current.group].map(word => ({ label: word, value: word, default: word === selected })),
+          placeholder: 'Choose a word to submit', min_values: 1, max_values: 1,
+          options: WORD_GROUPS[current.group].map(word => ({ label: word, value: word })),
         }] },
         { type: 1, components: [{ type: 2, style: 2, label: 'Refresh', custom_id: `mermer:portrait:refresh:${round.id}:${current.version}` }] },
       ],
@@ -142,31 +177,40 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     if (body.data?.custom_id === 'mermer:panel:portrait') return start(body);
     const match = /^mermer:portrait:(open|select|refresh):([a-f0-9]{20})(?::(\d+))?$/.exec(body.data?.custom_id ?? '');
     if (!match) return reply('This portrait button is no longer supported.');
+    const terminal = content => match[1] === 'open' ? reply(content) : { response: { type: 7, data: closed(content) } };
     const error = eligibility(body);
-    if (error) return reply(error);
+    if (error) return terminal(error);
     const round = active;
     if (!round || round.id !== match[2] || round.status !== 'open' || now() >= round.deadline) {
-      return reply('This round has closed. Open a new Player Portrait from /social.');
+      return terminal('This round has closed. Open a new Player Portrait from /social.');
     }
     const user = body.member.user.id;
     if (!round.participants.has(user)) return reply('You joined after this round started. You can take part in the next round.');
+    if (round.submitted.has(user)) return terminal(privateStatus(round, user));
     const previous = round.views.get(user);
     if (match[1] === 'open') {
       round.views.set(user, { group: previous?.group ?? 0, version: (previous?.version ?? 0) + 1 });
-      return view(round, user, true);
+      return privateView(round, user, body, true);
     }
     if (!previous || String(previous.version) !== match[3]) return reply('Please use your most recently opened word selector.');
     if (match[1] === 'refresh') previous.group = (previous.group + 1) % WORD_GROUPS.length;
     else {
       const values = body.data.values;
-      if (!Array.isArray(values) || values.length > 1 || (values.length === 1 && !WORD_GROUPS[previous.group].includes(values[0]))) {
+      if (!Array.isArray(values) || values.length !== 1 || !WORD_GROUPS[previous.group].includes(values[0])) {
         return reply('Please choose one of the displayed words.');
       }
-      if (values.length) round.choices.set(user, values[0]);
-      else round.choices.delete(user);
+      round.choices.set(user, values[0]);
+      round.submitted.set(user, values[0]);
+      return {
+        response: { type: 7, data: closed(`✅ Submitted: **${values[0]}**. ${allSubmitted(round) ? 'The portrait is ready to reveal.' : 'Waiting for the other players.'}`) },
+        afterReply: async () => {
+          if (round.status === 'open' && allSubmitted(round)) await finish(round);
+          else await cleanPanels(round, user);
+        },
+      };
     }
     previous.version++;
-    return view(round, user, false);
+    return privateView(round, user, body, false);
   }
   return {
     handle, eligibility,

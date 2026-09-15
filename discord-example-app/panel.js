@@ -15,8 +15,8 @@ export function panelMessage() {
       color: 0x5865f2,
       fields: [
         { name: '🎭 Funny Exit', value: 'Find a playful way to leave. Preview privately, then send when you are ready.' },
-        { name: '🎨 Collaborative Portrait', value: 'Join the game voice channel. Choose a word privately in 10 seconds and reveal a playful team portrait.' },
-        { name: '🎲 Random Picker', value: 'Take turns getting the opportunity to invite a friend. Coming soon.' },
+        { name: '🎨 Collaborative Portrait', value: 'Join the game voice channel. Choose a word to submit immediately; the portrait appears when everyone submits or after 10 seconds.' },
+        { name: '🎲 Random Picker', value: 'Join the game voice channel. Take turns getting the opportunity to invite a friend, or pass to another player.' },
       ],
       footer: { text: PANEL_MARKER },
     }],

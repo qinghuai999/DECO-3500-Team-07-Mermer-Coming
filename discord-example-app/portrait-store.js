@@ -3,9 +3,9 @@ import { join } from 'node:path';
 
 // One bot process owns this file. Mount its directory as a Docker volume.
 // Selections and interaction tokens are intentionally never written to disk.
-export function createPortraitStore(directory, scope) {
+export function createPortraitStore(directory, scope, filename = 'portrait-state.json') {
   mkdirSync(directory, { recursive: true, mode: 0o700 });
-  const file = join(directory, 'portrait-state.json');
+  const file = join(directory, filename);
   return {
     load() {
       try {

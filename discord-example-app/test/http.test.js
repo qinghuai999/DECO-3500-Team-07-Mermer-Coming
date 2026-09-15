@@ -5,8 +5,9 @@ import { once } from 'node:events';
 import { createApp } from '../app.js';
 import { PANEL_ACTIONS } from '../panel.js';
 import { createPortrait } from '../portrait.js';
+import { createPicker } from '../picker.js';
 
-test('signed HTTP interactions support a private preview and deferred confirmation; unsigned requests fail', async () => {
+test('signed HTTP routes exercise Exit, Social, immediate Portrait and Picker; unsigned requests fail', async () => {
   const keys = generateKeyPairSync('ed25519');
   const publicKey = keys.publicKey.export({ type: 'spki', format: 'der' }).subarray(-32).toString('hex');
   const writes = [];
@@ -24,7 +25,13 @@ test('signed HTTP interactions support a private preview and deferred confirmati
     store: { load: () => ({ seen: [], active: null }), save: () => {} },
     schedule: fn => { endRound = fn; return 1; }, unschedule: () => {},
   });
-  const app = createApp({ publicKey, guildId: '111111111111111111', resultChannelId: '333333333333333333', api, portrait,
+  const picker = createPicker({ api, guildId: '111111111111111111', textChannelId: '222222222222222222',
+    voiceChannelId: '333333333333333333', now: () => clock,
+    roster: { snapshot: () => ({ ready: true, ids: ['777777777777777777'] }), subscribe: () => () => {} },
+    store: { load: () => ({ seen: [], active: null }), save: () => {} },
+    schedule: () => 1, unschedule: () => {},
+  });
+  const app = createApp({ publicKey, guildId: '111111111111111111', resultChannelId: '333333333333333333', api, portrait, picker,
   });
   const server = app.listen(0, '127.0.0.1');
   try {
@@ -73,13 +80,33 @@ test('signed HTTP interactions support a private preview and deferred confirmati
     const open = writes[4].body.components[0].components[0].custom_id;
     const chooser = await post({ ...base, data: { custom_id: open } });
     assert.equal(chooser.data.flags, 64);
-    assert.equal((await post({ ...base, data: { custom_id: chooser.data.components[0].components[0].custom_id, values: ['lucky'] } })).type, 7);
-    clock += 10_000;
-    await endRound();
-    assert.match(writes.at(-1).body.content, /lucky/);
+    const submitted = await post({ ...base, data: { custom_id: chooser.data.components[0].components[0].custom_id, values: ['lucky'] } });
+    assert.equal(submitted.type, 7);
+    assert.deepEqual(submitted.data.components, []);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(clock, 100_000); // No waiting for the deadline in a one-player round.
+    assert.match(writes.findLast(call => call.path.startsWith('channels/')).body.content, /lucky/);
+    assert.match(writes.at(-1).body.content, /Submitted/);
     assert.deepEqual(writes.at(-1).body.components, []);
+    const pickerDone = new Promise(resolve => { finishDelivery = resolve; });
+    assert.deepEqual(await post({ ...base, id: '999999999999999997', data: { custom_id: PANEL_ACTIONS.picker } }),
+      { type: 5, data: { flags: 64 } });
+    await pickerDone;
+    const pickerMessage = writes.findLast(call => call.path.startsWith('channels/')).body;
+    assert.match(pickerMessage.content, /invitation|invite/);
+    assert.equal(pickerMessage.interaction_metadata, undefined);
+    const pass = pickerMessage.components[0].components[1].custom_id;
+    const denied = await post({ ...base, member: { user: { id: '123456789012345678' } }, data: { custom_id: pass } });
+    assert.equal(denied.data.flags, 64);
+    assert.match(denied.data.content, /Join/);
+    assert.deepEqual(await post({ ...base, data: { custom_id: pass } }), { type: 5, data: { flags: 64 } });
+    await new Promise(resolve => setImmediate(resolve));
+    const ended = writes.findLast(call => call.path.startsWith('channels/')).body;
+    assert.match(ended.content, /Everyone has passed or left/);
+    assert.deepEqual(ended.components, []);
   } finally {
     portrait.dispose();
+    picker.dispose();
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));
   }

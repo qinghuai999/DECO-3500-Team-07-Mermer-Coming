@@ -1,6 +1,10 @@
 # Mermer Discord bot
 
-当前功能与 EC2 面板部署步骤见 [控制面板部署说明](./PANEL.md)。使用 `/social` 在当前频道调出三按钮面板，不向其他频道成员显示触发者；也可发布固定置顶面板。Funny Exit 支持私密预览、换一条、发送和取消，Portrait 与 Random Picker 暂为待开放入口。
+使用 `/social` 在当前频道调出三按钮面板，不向其他频道成员显示触发者。Funny Exit 支持英文借口的私密预览、换一条、发送和取消。Portrait 与 Random Picker 仅允许绑定的游戏语音频道成员在指定文字频道参与。
+
+Portrait 选中一个词即提交并关闭私密控件；全部参与者提交后立即出结果，否则最多等待 10 秒，未选词按空白处理。结果来自本地英文模板，无外部 AI。Random Picker 公平轮换选人，仅被选者可以选择 `I'll Invite Someone` 完成本轮或 `Pass / Draw Again` 重抽；所有人都 Pass/离开或 60 秒未回应时结束。语音名单自动同步，新加入者从下一轮参与。
+
+运行配置使用 `.env.sample` 中的 `GUILD_ID`、`GAME_VOICE_CHANNEL_ID`、`SOCIAL_TEXT_CHANNEL_ID`。Docker 保留 `STATE_DIR=/app/data` 和 `-v mermer-data:/app/data`，两个功能分别保存轮换记录；私密选词及交互 token 不写入数据文件。更新后重建并替换容器，再用 `/social` 调出新面板，无需新增命令注册。测试使用 `npm test`，不调用真实 Discord。原来的 [部署说明](./PANEL.md) 保留为早期部署参考，其中待开放状态与画像计时规则以本段为准。
 
 以下为项目继承的 Discord 入门示例文档，示例中的游戏功能和文件结构不代表当前实现。线上部署使用 EC2 + Caddy，无需本机公网隧道。
 
