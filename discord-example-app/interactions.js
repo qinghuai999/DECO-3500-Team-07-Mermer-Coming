@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { getRandomExcuse } from './excuses.js';
-import { PANEL_ACTIONS } from './panel.js';
+import { PANEL_ACTIONS, panelMessage } from './panel.js';
 
 const privateReply = content => ({ type: 4, data: { content, flags: 64, allowed_mentions: { parse: [] } } });
 const update = content => ({ type: 7, data: { content, components: [], allowed_mentions: { parse: [] } } });
@@ -9,7 +9,40 @@ const update = content => ({ type: 7, data: { content, components: [], allowed_m
 // Multiplayer sessions will require durable storage in the next implementation.
 export function createInteractions({ api, resultChannelId, guildId, now = Date.now, randomExcuse = getRandomExcuse }) {
   const drafts = new Map();
+  const socialRequests = new Map();
   const lifetime = 10 * 60 * 1000;
+
+  function social(body) {
+    if (!body.guild_id || (guildId && body.guild_id !== guildId)) {
+      return { response: privateReply('Please use /social in the configured server.') };
+    }
+    for (const [id, expires] of socialRequests) if (expires <= now()) socialRequests.delete(id);
+    const response = { type: 5, data: { flags: 64 } };
+    if (socialRequests.has(body.id)) return { response };
+    if (socialRequests.size >= 1000) return { response: privateReply('The bot is busy. Please try again shortly.') };
+    socialRequests.set(body.id, now() + 15 * 60 * 1000);
+    return {
+      response,
+      afterReply: async () => {
+        let content;
+        try {
+          // A normal bot message has no command-response attribution. Never use
+          // an interaction follow-up or reply reference for the public panel.
+          await api(`channels/${body.channel_id}/messages`, { method: 'POST', body: {
+            ...panelMessage(), nonce: body.id, enforce_nonce: true,
+          } });
+          content = 'The social panel is ready in this channel.';
+        } catch (error) {
+          content = error.status && error.status < 500
+            ? 'Discord rejected the panel. Check the bot’s Send Messages and Embed Links permissions in this channel.'
+            : 'Could not confirm delivery. Check this channel before trying /social again.';
+        }
+        await api(`webhooks/${body.application_id}/${body.token}/messages/@original`, {
+          method: 'PATCH', body: { content, allowed_mentions: { parse: [] } },
+        });
+      },
+    };
+  }
 
   function preview(id, draft, initial) {
     return {
@@ -50,6 +83,7 @@ export function createInteractions({ api, resultChannelId, guildId, now = Date.n
   }
 
   return function handle(body) {
+    if (body.type === 2 && body.data?.name === 'social') return social(body);
     const action = body.data?.custom_id;
     if ((body.type === 2 && body.data?.name === 'excuse') || action === PANEL_ACTIONS.exit) return start(body);
     if (action === PANEL_ACTIONS.portrait) return { response: privateReply('🎨 Collaborative Portrait is coming soon. No activity has started, and your click has not been announced.') };

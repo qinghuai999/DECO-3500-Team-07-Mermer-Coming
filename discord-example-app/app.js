@@ -43,8 +43,8 @@ export function createApp({ api = discordApi, publicKey = process.env.PUBLIC_KEY
         });
       }
 
-      if (name === 'excuse') {
-        return res.send(handleInteraction(req.body).response);
+      if (name === 'excuse' || name === 'social') {
+        return respondToInteraction(req, res);
       }
 
       console.error(`unknown command: ${name}`);
@@ -52,18 +52,22 @@ export function createApp({ api = discordApi, publicKey = process.env.PUBLIC_KEY
     }
 
     if (type === InteractionType.MESSAGE_COMPONENT) {
-      const { response, afterReply } = handleInteraction(req.body);
-      if (afterReply) {
-        res.once('finish', () => {
-          afterReply().catch(() => console.error('Could not update private interaction response.'));
-        });
-      }
-      return res.send(response);
+      return respondToInteraction(req, res);
     }
 
     console.error('unknown interaction type', type);
     return res.status(400).json({ error: 'unknown interaction type' });
   });
+
+  function respondToInteraction(req, res) {
+    const { response, afterReply } = handleInteraction(req.body);
+    if (afterReply) {
+      res.once('finish', () => {
+        afterReply().catch(() => console.error('Could not update private interaction response.'));
+      });
+    }
+    return res.send(response);
+  }
 
   return app;
 }

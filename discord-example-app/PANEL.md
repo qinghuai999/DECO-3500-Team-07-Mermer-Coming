@@ -2,6 +2,7 @@
 
 ## 当前实现
 
+- `/social`：在当前频道底部发送一条新的三按钮面板。命令先私密确认，公开面板通过普通机器人消息发送，不显示调用者、不引用命令、不提及用户。频道成员可以点击。每次独立调用会发新面板，不自动置顶、不删除旧面板。此处匿名指不向其他频道成员显示触发者，Discord 和处理请求的机器人仍知道调用者。
 - 一条消息包含 Funny Exit、Collaborative Portrait、Random Picker 三个按钮，发布时自动置顶。
 - Funny Exit：私密预览 → Another One / Send / Cancel。只有确认 Send 才会在结果频道公开发送并标明离开者。
 - Portrait 和 Random Picker：入口可点击，当前仅给点击者返回“尚未开放”，未实现多人会话、AI 画像、公平轮换或数据库。
@@ -20,11 +21,13 @@ Discord 置顶消息不会一直悬浮在聊天窗口顶部。推荐创建独立
 
 ## 2. 更新 EC2 代码与配置
 
-先将本次代码提交并推送到团队仓库的 `main`（或合并对应 PR），再在 **EC2 Session Manager 终端**执行：
+当前由开发者独自调试：先将本次代码提交并推送到团队仓库的 `kiki_develop`，让现有 EC2 和机器人运行开发版。验收后再通过 PR 合并 `main`。在 **EC2 Session Manager 终端**执行（已有未提交修改时先处理，勿强制覆盖）：
 
 ```bash
 cd ~/DECO-3500-Team-07-Mermer-Coming
-git pull --ff-only origin main
+git fetch origin
+git switch kiki_develop
+git pull --ff-only origin kiki_develop
 cd discord-example-app
 sudo docker build -t mermer-bot:node24 .
 ```
@@ -74,7 +77,19 @@ curl -fsS https://mermerteam07.duckdns.org/
 
 预期显示 `Listening on port 3000` 和 `ok`。Caddy 与 Discord 的 Interactions Endpoint URL 保持现有配置。
 
-## 4. 发布并置顶
+## 4. 注册 /social 并测试
+
+新容器启动成功后执行一次命令注册：
+
+```bash
+sudo docker exec mermer-bot npm run register
+```
+
+该脚本会更新服务器和全局命令列表，保留当前 `/test`、`/excuse` 并加入 `/social`。它会替换本应用原有的命令列表。服务器命令一般可立即测试；必要时重新打开 Discord 命令选择框。
+
+在游戏文字频道输入 `/social`。你会看到私密确认，频道里出现机器人发送的面板。用另一账号查看，应看不到是谁调出了面板。该方式不需要 `PANEL_CHANNEL_ID` 或 Pin Messages 权限；机器人需要查看频道、发送消息、嵌入链接权限，玩家需要 Use Application Commands 权限。Funny Exit 的公开结果仍遵循 `RESULT_CHANNEL_ID` 配置。
+
+## 可选：发布固定面板并置顶
 
 ```bash
 sudo docker exec mermer-bot npm run panel
@@ -88,7 +103,7 @@ sudo docker exec mermer-bot npm run panel
 sudo docker exec -e PANEL_MESSAGE_ID=消息ID mermer-bot npm run panel
 ```
 
-面板入口无需重新注册 slash command。
+仅更新固定面板内容无需重新注册 slash command；新增 `/social` 需要执行上面的注册步骤。
 
 ## 5. 验收
 

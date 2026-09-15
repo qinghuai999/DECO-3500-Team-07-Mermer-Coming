@@ -48,6 +48,14 @@ test('signed HTTP interactions support a private preview and deferred confirmati
     assert.equal(writes.length, 2);
     assert.equal(writes[0].path, 'channels/333333333333333333/messages');
     assert.deepEqual(writes[1].body.components, []);
+    const socialDone = new Promise(resolve => { finishDelivery = resolve; });
+    assert.deepEqual(await post({ ...base, type: 2, id: '999999999999999999', data: { name: 'social' } }),
+      { type: 5, data: { flags: 64 } });
+    await socialDone;
+    assert.equal(writes.length, 4);
+    assert.equal(writes[2].path, 'channels/222222222222222222/messages');
+    assert.equal(writes[2].body.components[0].components.length, 3);
+    assert.equal(JSON.stringify(writes[2].body).includes(base.member.user.id), false);
   } finally {
     server.closeAllConnections();
     await new Promise(resolve => server.close(resolve));

@@ -77,6 +77,47 @@ function featureHarness() {
 }
 const actionFrom = (response, index) => response.data.components[0].components[index].custom_id;
 
+test('/social acknowledges privately and sends a normal panel without user attribution once', async () => {
+  const { handle, calls } = featureHarness();
+  const command = { ...interaction(), type: 2, data: { name: 'social' } };
+  const pending = handle(command);
+  assert.deepEqual(pending.response, { type: 5, data: { flags: 64 } });
+  assert.equal(calls.length, 0);
+  assert.equal(handle(command).afterReply, undefined);
+  await pending.afterReply();
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].path, `channels/${channel}/messages`);
+  assert.equal(calls[0].method, 'POST');
+  assert.equal(calls[0].body.components[0].components.length, 3);
+  assert.equal(calls[0].body.message_reference, undefined);
+  assert.equal(calls[0].body.interaction_metadata, undefined);
+  assert.equal(JSON.stringify(calls[0].body).includes(command.member.user.id), false);
+  assert.deepEqual(calls[0].body.allowed_mentions, { parse: [] });
+  assert.equal(calls[0].body.enforce_nonce, true);
+  assert.equal(calls[1].path, `webhooks/${bot}/test-token/messages/@original`);
+  assert.equal(calls[1].method, 'PATCH');
+});
+
+test('/social rejects DMs and another server privately; publication errors stay private', async () => {
+  const { handle } = featureHarness();
+  const command = { ...interaction(), type: 2, data: { name: 'social' } };
+  for (const guild_id of [undefined, 'other-server']) {
+    const rejected = handle({ ...command, guild_id });
+    assert.equal(rejected.response.data.flags, 64);
+    assert.equal(rejected.afterReply, undefined);
+  }
+  const calls = [];
+  const failing = createInteractions({ guildId: guild, api: async (path, options) => {
+    calls.push({ path, ...options });
+    if (options.method === 'POST') throw Object.assign(new Error('forbidden'), { status: 403 });
+  } });
+  await failing(command).afterReply();
+  assert.equal(calls.length, 2);
+  assert.match(calls[1].body.content, /permissions/);
+  assert.equal(calls[1].method, 'PATCH');
+  assert.equal(failing(command).afterReply, undefined);
+});
+
 test('exit preview, refresh and cancel remain private and never publish', () => {
   const { handle, calls } = featureHarness();
   const first = handle(interaction(PANEL_ACTIONS.exit)).response;

@@ -21,7 +21,20 @@ const EXCUSE_COMMAND = {
   contexts: [0, 1, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, EXCUSE_COMMAND];
+const SOCIAL_COMMAND = {
+  name: 'social',
+  description: 'Show the social panel without publicly identifying who opened it',
+  description_localizations: {
+    'zh-CN': '调出社交面板，不公开显示触发者',
+    'zh-TW': '叫出社交面板，不公開顯示觸發者',
+  },
+  type: 1,
+  integration_types: [0],
+  contexts: [0],
+  dm_permission: false,
+};
+
+const ALL_COMMANDS = [TEST_COMMAND, EXCUSE_COMMAND, SOCIAL_COMMAND];
 
 if (process.env.GUILD_ID) {
   await InstallGuildCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_COMMANDS);
