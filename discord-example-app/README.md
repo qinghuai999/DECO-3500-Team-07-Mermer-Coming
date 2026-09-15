@@ -1,4 +1,10 @@
-# Getting Started app for Discord
+# Mermer Discord bot
+
+当前功能与 EC2 面板部署步骤见 [控制面板部署说明](./PANEL.md)。三个入口已实现；Funny Exit 支持私密预览、换一条、发送和取消，Portrait 与 Random Picker 暂为待开放入口。
+
+以下为项目继承的 Discord 入门示例文档，示例中的游戏功能和文件结构不代表当前实现。线上部署使用 EC2 + Caddy，无需本机公网隧道。
+
+## Original starter guide
 
 This project contains a basic rock-paper-scissors-style Discord app written in JavaScript, built for the [getting started guide](https://discord.com/developers/docs/getting-started).
 

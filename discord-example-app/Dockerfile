@@ -6,6 +6,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
 COPY app.js commands.js excuses.js utils.js excuses.json ./
+COPY discord-api.js panel.js publish-panel.js interactions.js ./
 
 ENV NODE_ENV=production
 EXPOSE 3000
