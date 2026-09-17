@@ -75,6 +75,10 @@ function featureHarness() {
   });
   return { handle, calls, expire: () => { clock = 600_001; } };
 }
+function openPreview(handle, category = 0) {
+  const menu = handle(interaction(PANEL_ACTIONS.exit)).response;
+  return handle(interaction(menu.data.components.flatMap(row => row.components)[category].custom_id)).response;
+}
 const actionFrom = (response, index) => response.data.components[0].components[index].custom_id;
 
 test('/social acknowledges privately and sends a normal panel without user attribution once', async () => {
@@ -120,11 +124,13 @@ test('/social rejects DMs and another server privately; publication errors stay 
 
 test('exit preview, refresh and cancel remain private and never publish', () => {
   const { handle, calls } = featureHarness();
-  const first = handle(interaction(PANEL_ACTIONS.exit)).response;
-  assert.equal(first.data.flags, 64);
+  const menu = handle(interaction(PANEL_ACTIONS.exit)).response;
+  assert.equal(menu.data.flags, 64);
+  assert.equal(menu.data.components.length, 3);
+  const first = openPreview(handle);
   const refreshed = handle(interaction(actionFrom(first, 1))).response;
   assert.equal(refreshed.type, 7);
-  assert.notEqual(first.data.content, refreshed.data.content);
+  assert.notEqual(first.data.embeds[0].description, refreshed.data.embeds[0].description);
   assert.equal(handle(interaction(actionFrom(first, 2))).response.data.components.length, 0);
   assert.equal(handle(interaction(actionFrom(first, 0))).afterReply, undefined);
   assert.equal(calls.length, 0);
@@ -132,7 +138,7 @@ test('exit preview, refresh and cancel remain private and never publish', () => 
 
 test('confirm acknowledges first and publishes once despite duplicate clicks', async () => {
   const { handle, calls } = featureHarness();
-  const preview = handle(interaction(PANEL_ACTIONS.exit)).response;
+  const preview = openPreview(handle);
   const click = interaction(actionFrom(preview, 0));
   const send = handle(click);
   assert.equal(send.response.type, 6);
@@ -150,7 +156,7 @@ test('confirm acknowledges first and publishes once despite duplicate clicks', a
 
 test('another user cannot send a draft; expiration and restart invalidate old previews', () => {
   const h = featureHarness();
-  const preview = h.handle(interaction(PANEL_ACTIONS.exit)).response;
+  const preview = openPreview(h.handle);
   const action = actionFrom(preview, 0);
   assert.equal(h.handle(interaction(action, '100000000000000099')).afterReply, undefined);
   h.expire();
@@ -175,7 +181,7 @@ test('uncertain delivery is not automatically retried and clears Send controls',
     calls.push({ path, ...options });
     if (options.method === 'POST') throw new Error('timeout');
   } });
-  const preview = handle(interaction(PANEL_ACTIONS.exit)).response;
+  const preview = openPreview(handle);
   const action = interaction(actionFrom(preview, 0));
   await handle(action).afterReply();
   assert.equal(calls.filter(call => call.method === 'POST').length, 1);

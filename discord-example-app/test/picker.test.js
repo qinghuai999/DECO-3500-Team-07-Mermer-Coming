@@ -29,120 +29,109 @@ function harness({ apiHook, saveHook } = {}) {
   return { picker, config, calls, tasks, state: () => state,
     async start(user = C) { const action = picker.handle(request(undefined, user)); await action.afterReply?.(); return action; },
     current: () => calls.findLast(call => call.path.startsWith('channels/')),
-    async click(index, user) {
-      const latest = calls.findLast(call => call.path.startsWith('channels/'));
-      const action = picker.handle(request(latest.body.components[0].components[index].custom_id, user));
-      await action.afterReply?.(); return action;
-    },
     change(next, connected = true) { ids = next; ready = connected; for (const fn of listeners) fn(); },
     async advance(ms) { clock += ms; for (const task of [...tasks]) if (task.due <= clock) { tasks.delete(task); await task.fn(); } },
   };
 }
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-test('picker is anonymous, restricted to bound voice/text/guild and excludes simultaneous starts', async () => {
+async function finish(h) { await h.advance(600); await h.advance(2400); }
+const display = h => JSON.stringify(h.current().body);
+
+test('anonymous draw shows finding, rolling, result in one message and finishes in about three seconds', async () => {
   const h = harness();
   for (const body of [request(undefined, 'outsider'), { ...request(), guild_id: 'wrong' }, { ...request(), channel_id: 'wrong' }]) {
     const action = h.picker.handle(body);
     assert.equal(action.response.data.flags, 64);
     assert.equal(action.afterReply, undefined);
   }
-  const startRequest = request();
-  const start = h.picker.handle(startRequest);
+  const trigger = request();
+  const start = h.picker.handle(trigger);
   assert.deepEqual(start.response, { type: 5, data: { flags: 64 } });
   assert.equal(h.calls.length, 0);
   assert.match(h.picker.handle(request()).response.data.content, /already in progress/);
   await start.afterReply();
-  const message = h.current().body;
-  assert.match(message.content, new RegExp(A));
-  assert.equal(JSON.stringify(message).includes(C), false);
-  assert.equal(message.message_reference, undefined);
-  assert.equal(message.interaction_metadata, undefined);
-  assert.equal(message.enforce_nonce, true);
-  assert.deepEqual(message.allowed_mentions, { parse: [] });
-  await h.click(0, A);
-  assert.equal(h.picker.handle(startRequest).afterReply, undefined);
-});
-
-test('only the selected player can pass or accept, repeated clicks cannot draw twice, everyone passing ends', async () => {
-  const h = harness();
-  await h.start();
-  const pass = h.current().body.components[0].components[1].custom_id;
-  assert.match(h.picker.handle(request(pass, B)).response.data.content, /Only the selected/);
-  const first = h.picker.handle(request(pass, A));
-  assert.equal(first.response.data.flags, 64);
-  assert.match(h.picker.handle(request(pass, A)).response.data.content, /already being processed/);
-  await first.afterReply();
-  assert.match(h.current().body.content, new RegExp(B));
-  assert.match(h.picker.handle(request(pass, A)).response.data.content, /moved on/);
-  await h.click(1, B);
-  assert.match(h.current().body.content, new RegExp(C));
-  await h.click(1, C);
-  assert.match(h.current().body.content, /Everyone has passed or left/);
-  assert.deepEqual(h.current().body.components, []);
+  const initial = h.current();
+  assert.match(initial.body.content, /Finding players/);
+  assert.equal(initial.body.message_reference, undefined);
+  assert.equal(initial.body.interaction_metadata, undefined);
+  assert.equal(initial.body.enforce_nonce, true);
+  assert.equal(JSON.stringify(initial.body).includes(C), false);
+  await h.advance(599);
+  assert.equal(h.current(), initial);
+  await h.advance(1);
+  assert.match(display(h), /Rolling/);
+  await h.advance(2399);
+  assert.match(display(h), /Rolling/);
+  await h.advance(1);
+  assert.match(display(h), new RegExp(A));
+  assert.match(display(h), /make the decision/);
+  assert.equal(display(h).includes(C), false);
   assert.equal(h.state().active, null);
   assert.equal(h.tasks.size, 0);
+  assert.deepEqual(h.current().body.components, []);
+  assert.deepEqual(h.current().body.allowed_mentions, { parse: [] });
   assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
+  assert.equal(h.picker.handle(trigger).afterReply, undefined);
+  assert.match(h.picker.handle(request('mermer:picker:pass:old:1')).response.data.content, /old/);
 });
 
-test('accept ends the round; fair rotation continues across rounds and resets after all have a turn', async () => {
+test('fair rotation continues across completed draws and resets only after everyone has a turn', async () => {
   const h = harness();
   for (const selected of [A, B, C, A]) {
-    await h.start();
-    assert.match(h.current().body.content, new RegExp(selected));
-    await h.click(0, selected);
-    assert.match(h.current().body.content, /accepted the invitation opportunity/);
+    await h.start(); await finish(h);
+    assert.match(display(h), new RegExp(selected));
     assert.deepEqual(h.current().body.components, []);
     assert.equal(h.state().active, null);
   }
 });
 
-test('selected player leaving redraws; late joiners wait for next round; rejoining cannot reclaim a passed turn', async () => {
+test('leavers and late joiners are excluded; rejoining during the draw does not restore eligibility', async () => {
   const h = harness();
   h.change([A, B]);
   await h.start(B);
-  h.change([A, B, C]);
+  await h.advance(600);
   h.change([B, C]);
-  await flush();
-  assert.match(h.current().body.content, new RegExp(B));
   h.change([A, B, C]);
-  await h.click(1, B);
-  assert.match(h.current().body.content, /Everyone has passed or left/);
-  assert.deepEqual(h.current().body.components, []);
+  await h.advance(2400);
+  assert.match(display(h), new RegExp(B));
+  assert.equal(display(h).includes(A), false);
+  assert.equal(display(h).includes(C), false);
 });
 
-test('timeout and Gateway disconnect close the public controls and release the round', async () => {
+test('empty roster and lost Gateway close the draw and cancel pending timers', async () => {
   const h = harness();
   await h.start();
-  const old = h.current().body.components[0].components[1].custom_id;
-  await h.advance(60_000);
-  assert.match(h.current().body.content, /without a response/);
+  h.change([]); await flush();
+  assert.match(display(h), /everyone left/);
   assert.equal(h.state().active, null);
-  assert.match(h.picker.handle(request(old, A)).response.data.content, /closed/);
-  await h.start();
-  h.change([A, B, C], false);
-  await flush();
-  assert.match(h.current().body.content, /interrupted/);
+  assert.equal(h.tasks.size, 0);
+  h.change([A, B, C]);
+  await h.start(); await h.advance(600);
+  h.change([A, B, C], false); await flush();
+  assert.match(display(h), /interrupted/);
   assert.deepEqual(h.current().body.components, []);
   assert.equal(h.state().active, null);
   assert.equal(h.tasks.size, 0);
 });
 
-test('restart closes interrupted picker and preserves its separate fair rotation', async () => {
+test('restart closes an interrupted draw without charging an unannounced winner a turn', async () => {
   const h = harness();
-  await h.start();
+  await h.start(); await finish(h); // A completed a turn.
+  await h.start(); await h.advance(600); // No winner yet.
   h.picker.dispose();
   assert.equal(JSON.stringify(h.state()).includes('private-token'), false);
   const restored = createPicker(h.config);
   assert.match(restored.handle(request()).response.data.content, /recovering/);
   await restored.recover();
-  assert.match(h.current().body.content, /restarted/);
+  assert.match(display(h), /restarted/);
   await restored.handle(request()).afterReply();
-  assert.match(h.current().body.content, new RegExp(B));
+  await finish(h);
+  assert.match(display(h), new RegExp(B));
   restored.dispose();
 });
 
-test('API failures release locks and disk failures prevent a draw; no automatic duplicate POST', async () => {
+test('API failures release locks and disk failures prevent a draw; no duplicate public POST', async () => {
   let failing = 'POST';
   const h = harness({ apiHook: (path, options) => {
     if (path.startsWith('channels/') && options.method === failing) throw Object.assign(new Error('denied'), { status: 403 });
@@ -153,8 +142,7 @@ test('API failures release locks and disk failures prevent a draw; no automatic 
   assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
   failing = null;
   await h.start();
-  failing = 'PATCH';
-  await h.click(1, A);
+  failing = 'PATCH'; await h.advance(600);
   assert.equal(h.state().active, null);
   assert.equal(h.tasks.size, 0);
   const broken = harness({ saveHook: () => { throw new Error('disk full'); } });
@@ -162,17 +150,25 @@ test('API failures release locks and disk failures prevent a draw; no automatic 
   assert.equal(broken.calls.length, 0);
 });
 
-test('voice changes during an in-flight public POST are reconciled after publication', async () => {
+test('voice changes during an in-flight POST or rolling edit are reconciled without stale updates', async () => {
   let release;
   const wait = new Promise(resolve => { release = resolve; });
   const h = harness({ apiHook: (_path, options) => options.method === 'POST' ? wait : undefined });
   const pending = h.picker.handle(request()).afterReply();
-  h.change([B, C]);
-  release();
-  await pending;
-  assert.match(h.current().body.content, new RegExp(B));
+  h.change([B, C]); release(); await pending;
+  await finish(h);
+  assert.match(display(h), new RegExp(B));
   assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
-  h.picker.dispose();
+  let releaseEdit;
+  const editing = new Promise(resolve => { releaseEdit = resolve; });
+  const other = harness({ apiHook: (path, options) => path.startsWith('channels/') && options.body.embeds?.[0]?.title.includes('Rolling') ? editing : undefined });
+  await other.start();
+  const rolling = other.advance(600);
+  other.change([], false);
+  releaseEdit(); await rolling;
+  assert.match(display(other), /interrupted/);
+  assert.equal(other.state().active, null);
+  assert.equal(other.tasks.size, 0);
 });
 
 test('existing portrait state and picker state remain separate in the same data volume', () => {
@@ -187,13 +183,11 @@ test('existing portrait state and picker state remain separate in the same data 
   } finally { rmSync(dir, { recursive: true }); }
 });
 
-test('HTTP interaction router connects both picker start and pass buttons', async () => {
+test('interaction router starts Random Pick and retires old pass controls', async () => {
   const h = harness();
   const handle = createInteractions({ api: h.config.api, guildId, picker: h.picker });
-  const start = handle(request());
-  await start.afterReply();
-  const pass = handle(request(h.current().body.components[0].components[1].custom_id, A));
-  await pass.afterReply();
-  assert.match(h.current().body.content, new RegExp(B));
-  h.picker.dispose();
+  await handle(request()).afterReply();
+  await finish(h);
+  assert.match(display(h), new RegExp(A));
+  assert.match(handle(request('mermer:picker:pass:old:1')).response.data.content, /old/);
 });

@@ -11,7 +11,7 @@ const TEST_COMMAND = {
 
 const EXCUSE_COMMAND = {
   name: 'excuse',
-  description: 'Preview a playful exit message, then choose whether to send it',
+  description: 'Choose an excuse category, then preview and send when you are ready',
   description_localizations: null,
   type: 1,
   integration_types: [0, 1],

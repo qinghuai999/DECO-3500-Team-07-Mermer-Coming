@@ -10,26 +10,21 @@ export function panelMessage() {
     content: '',
     allowed_mentions: { parse: [] },
     embeds: [{
-      title: 'TEAM SOCIAL PANEL',
-      description: 'Leave · Express · Decide\nChoose a button to get started. Your first response is visible only to you.',
+      title: '🎮 Pally Together!',
+      description: 'Play together. Enjoy together.\n\n🎲 **Random Pick** · Let chance make the choice.\n🎨 **Trait Picker** · Share a word. Build a portrait.\n🎭 **Excuse Generator** · Find your wonderfully unlikely excuse.',
       color: 0x5865f2,
-      fields: [
-        { name: '🎭 Funny Exit', value: 'Find a playful way to leave. Preview privately, then send when you are ready.' },
-        { name: '🎨 Collaborative Portrait', value: 'Join the game voice channel. Choose a word to submit immediately; the portrait appears when everyone submits or after 10 seconds.' },
-        { name: '🎲 Random Picker', value: 'Join the game voice channel. Take turns getting the opportunity to invite a friend, or pass to another player.' },
-      ],
-      footer: { text: PANEL_MARKER },
     }],
     components: [{ type: 1, components: [
-      { type: 2, style: 1, custom_id: PANEL_ACTIONS.exit, label: 'Funny Exit', emoji: { name: '🎭' } },
-      { type: 2, style: 2, custom_id: PANEL_ACTIONS.portrait, label: 'Collaborative Portrait', emoji: { name: '🎨' } },
-      { type: 2, style: 2, custom_id: PANEL_ACTIONS.picker, label: 'Random Picker', emoji: { name: '🎲' } },
+      { type: 2, style: 1, custom_id: PANEL_ACTIONS.picker, label: 'Random Pick', emoji: { name: '🎲' } },
+      { type: 2, style: 3, custom_id: PANEL_ACTIONS.portrait, label: 'Trait Picker', emoji: { name: '🎨' } },
+      { type: 2, style: 2, custom_id: PANEL_ACTIONS.exit, label: 'Excuse Generator', emoji: { name: '🎭' } },
     ] }],
   };
 }
 
 export function isPanel(message, botId) {
-  return message.author?.id === botId && message.embeds?.some(embed => embed.footer?.text === PANEL_MARKER);
+  return message.author?.id === botId && (message.embeds?.some(embed => embed.footer?.text === PANEL_MARKER)
+    || message.components?.some(row => row.components?.some(button => button.custom_id === PANEL_ACTIONS.exit)));
 }
 
 // Deployment-only operation. Never run this automatically on application boot.

@@ -51,13 +51,15 @@ function harness({ saved, apiHook, saveHook } = {}) {
     },
   };
 }
-const select = view => view.data.components[0].components[0].custom_id;
-const refresh = view => view.data.components[1].components[0].custom_id;
+const buttons = view => view.data.components.flatMap(row => row.components);
+const select = (view, word) => buttons(view).find(button => word ? button.custom_id.endsWith(`:${word}`) : button.custom_id.includes(':word:')).custom_id;
+const refresh = view => buttons(view).find(button => button.label === 'Other…').custom_id;
+const submit = view => buttons(view).find(button => button.label === 'Submit').custom_id;
+const resultText = h => JSON.stringify(result(h)?.body);
 const result = h => h.calls.findLast(call => call.path.startsWith('channels/') && call.method === 'PATCH');
 
-test('all 256 vocabulary combinations produce deterministic English prose including every valid word', () => {
-  for (let mask = 0; mask < 1 << WORDS.length; mask++) {
-    const words = WORDS.filter((_, i) => mask & (1 << i));
+test('all word pairs and the full vocabulary produce deterministic prose including every valid word', () => {
+  for (const words of [[], WORDS, ...WORDS.flatMap(a => WORDS.map(b => [a, b]))]) {
     const output = portraitText(words);
     assert.deepEqual(output, portraitText([...words].reverse().concat(words)));
     assert.doesNotMatch(JSON.stringify(output), /\p{Script=Han}/u);
@@ -96,49 +98,68 @@ test('anonymous start is acknowledged before publishing; simultaneous and replay
   assert.equal(publicMessage.body.interaction_metadata, undefined);
   assert.deepEqual(publicMessage.body.allowed_mentions, { parse: [] });
   assert.equal(publicMessage.body.enforce_nonce, true);
-  await h.advance(10_000);
+  await h.advance(30_000);
   assert.equal(h.portrait.handle(request).afterReply, undefined);
   assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
 });
 
-test('refresh is allowed only before immediate submission; late private controls are removed', async () => {
+test('one highlighted draft can change; Submit locks it and prevents a second submission', async () => {
   const h = harness();
   await h.start();
   let view = h.open(A);
   assert.equal(view.data.flags, 64);
+  assert.equal(buttons(view).find(b => b.label === 'Submit').disabled, true);
   const stale = select(view);
-  const deadline = [...h.tasks][0].due;
-  await h.advance(9000);
-  view = h.portrait.handle(body(refresh(view), A)).response;
-  assert.equal([...h.tasks][0].due, deadline);
-  assert.match(h.portrait.handle(body(stale, A, ['steady'])).response.data.content, /most recently/);
-  assert.match(h.portrait.handle(body(select(view), A, ['injected'])).response.data.content, /displayed words/);
-  assert.match(h.portrait.handle(body(select(view), A, ['clutch', 'creative'])).response.data.content, /displayed words/);
-  const late = select(view);
-  const submission = h.portrait.handle(body(late, A, ['creative']));
-  assert.equal(submission.response.type, 7);
-  assert.match(submission.response.data.content, /Submitted/);
-  assert.deepEqual(submission.response.data.components, []);
-  await submission.afterReply();
-  assert.match(h.portrait.handle(body(late, A, ['clutch'])).response.data.content, /Submitted/);
-  await h.advance(1000);
-  assert.match(result(h).body.content, /creative/);
-  assert.doesNotMatch(result(h).body.content, /clutch/);
-  const expired = h.portrait.handle(body(late, A, ['clutch'])).response;
+  const invalid = stale.replace(/:[a-z-]+$/, ':injected');
+  assert.match(h.portrait.handle(body(invalid, A)).response.data.content, /displayed words/);
+  view = h.portrait.handle(body(select(view, 'supportive'), A)).response;
+  assert.equal(result(h), undefined);
+  assert.match(view.data.content, /not submitted yet/);
+  assert.equal(buttons(view).filter(b => b.style === 1).length, 1);
+  assert.match(h.portrait.handle(body(stale, A)).response.data.content, /most recently/);
+  view = h.portrait.handle(body(select(view, 'creative'), A)).response;
+  assert.equal(buttons(view).filter(b => b.style === 1).length, 1);
+  assert.equal(buttons(view).find(b => b.style === 1).label, 'Creative');
+  const sent = h.portrait.handle(body(submit(view), A));
+  assert.deepEqual(sent.response.data.components, []);
+  await sent.afterReply();
+  assert.equal(result(h), undefined); // B has not submitted.
+  assert.match(h.portrait.handle(body(select(view), A)).response.data.content, /Submitted/);
+  await h.advance(30_000);
+  assert.match(resultText(h), /creative/);
+  assert.doesNotMatch(resultText(h), /supportive when/);
+  const expired = h.portrait.handle(body(select(view), A)).response;
   assert.equal(expired.type, 7);
   assert.deepEqual(expired.data.components, []);
-  assert.match(expired.data.content, /closed/);
 });
 
-test('solo submission ends immediately and all opened private panels are closed', async () => {
+test('timeout automatically submits the latest draft; Other changes options but not the deadline', async () => {
+  const h = harness();
+  await h.start();
+  let view = h.open(A);
+  const due = [...h.tasks][0].due;
+  await h.advance(20_000);
+  view = h.portrait.handle(body(select(view, 'funny'), A)).response;
+  view = h.portrait.handle(body(refresh(view), A)).response;
+  assert.equal([...h.tasks][0].due, due);
+  view = h.portrait.handle(body(select(view, 'reckless'), A)).response;
+  assert.equal(result(h), undefined);
+  await h.advance(10_000);
+  assert.match(resultText(h), /reckless/);
+  assert.doesNotMatch(resultText(h), /funny even/);
+  assert.ok(h.calls.some(call => call.path.startsWith('webhooks/') && /Submitted:.*reckless/i.test(call.body.content)));
+});
+
+test('solo selection does not end the round; manual Submit finishes without waiting and closes every private panel', async () => {
   const h = harness();
   h.change([A]);
   await h.start(A);
   h.open(A);
-  const latest = h.open(A);
-  const posted = h.portrait.handle(body(select(latest), A, ['steady']));
-  await posted.afterReply();
-  assert.match(result(h).body.content, /steady/);
+  let latest = h.open(A);
+  latest = h.portrait.handle(body(select(latest, 'patient'), A)).response;
+  assert.equal(result(h), undefined);
+  await h.portrait.handle(body(submit(latest), A)).afterReply();
+  assert.match(resultText(h), /patient/);
   assert.equal(h.tasks.size, 0);
   assert.equal(h.state().active, null);
   const cleaned = h.calls.filter(call => call.path.startsWith('webhooks/') && /Submitted/.test(call.body.content));
@@ -146,20 +167,26 @@ test('solo submission ends immediately and all opened private panels are closed'
   assert.ok(cleaned.every(call => call.body.components.length === 0 && !call.body.content.includes('<t:')));
 });
 
-test('multiplayer ends after everyone submits; timeouts close unanswered private panels without public counts', async () => {
+test('players get different button sets; everyone submitting finishes early and blanks stay blank', async () => {
   const h = harness();
   await h.start();
-  const a = h.open(A), b = h.open(B);
-  await h.portrait.handle(body(select(a), A, ['steady'])).afterReply();
+  let a = h.open(A), b = h.open(B);
+  assert.notDeepEqual(buttons(a).map(x => x.label), buttons(b).map(x => x.label));
+  a = h.portrait.handle(body(select(a, 'supportive'), A)).response;
+  b = h.portrait.handle(body(select(b, 'distracted'), B)).response;
+  await h.portrait.handle(body(submit(a), A)).afterReply();
   assert.equal(result(h), undefined);
-  await h.portrait.handle(body(select(b), B, ['lucky'])).afterReply();
+  await h.portrait.handle(body(submit(b), B)).afterReply();
   assert.equal(h.tasks.size, 0);
-  assert.match(result(h).body.content, /steady/);
-  assert.match(result(h).body.content, /lucky/);
+  assert.match(resultText(h), /supportive/);
+  assert.match(resultText(h), /distracted/);
+  assert.ok(result(h).body.embeds[0].title);
+  assert.deepEqual(result(h).body.allowed_mentions, { parse: [] });
+  assert.equal(resultText(h).includes(B), false); // No author-to-word attribution.
   await h.start();
   h.open(A); h.open(B);
-  await h.advance(10_000);
-  assert.match(result(h).body.content, /Intergalactic Loading Screen/);
+  await h.advance(30_000);
+  assert.match(resultText(h), /Unwritten Legend/);
   const empty = h.calls.filter(call => /No word was submitted/.test(call.body.content));
   assert.equal(empty.length, 2);
   assert.ok(empty.every(call => call.path.startsWith('webhooks/') && call.body.components.length === 0));
@@ -170,7 +197,7 @@ test('opening a private selector at the deadline cannot leave a stale selector a
   await h.start();
   const prompt = h.calls[0].body.components[0].components[0].custom_id;
   const opening = h.portrait.handle(body(prompt, A));
-  await h.advance(10_000);
+  await h.advance(30_000);
   await opening.afterReply();
   assert.match(h.calls.at(-1).body.content, /No word was submitted/);
   assert.deepEqual(h.calls.at(-1).body.components, []);
@@ -180,13 +207,13 @@ test('new members wait until next round; leaving voters lose their word; target 
   const h = harness();
   await h.start();
   const view = h.open(B);
-  h.portrait.handle(body(select(view), B, ['lucky']));
+  h.portrait.handle(body(select(view, 'lucky'), B));
   h.change([A, B, C]);
   assert.match(h.open(C).data.content, /next round/);
   h.change([A, C]);
   h.change([A, B, C]);
-  await h.advance(10_000);
-  assert.match(result(h).body.content, /Intergalactic Loading Screen/);
+  await h.advance(30_000);
+  assert.match(resultText(h), /Unwritten Legend/);
   await h.start(); // B is selected in the same fair rotation.
   h.change([A, C]);
   await new Promise(resolve => setImmediate(resolve));
@@ -200,7 +227,7 @@ test('new members wait until next round; leaving voters lose their word; target 
 test('fair rotation survives restart and interrupted messages are closed without storing private selections', async () => {
   const h = harness();
   await h.start();
-  h.portrait.handle(body(select(h.open(B)), B, ['lucky']));
+  h.portrait.handle(body(select(h.open(B), 'lucky'), B));
   assert.equal(JSON.stringify(h.state()).includes('lucky'), false);
   assert.equal(JSON.stringify(h.state()).includes('private-test-token'), false);
   h.portrait.dispose();
@@ -224,7 +251,7 @@ test('publication failure, final edit failure, and lost Gateway connection canno
   failPost = false;
   await h.start();
   failPatch = true;
-  await h.advance(10_000);
+  await h.advance(30_000);
   assert.equal(h.state().active, null);
   failPatch = false;
   await h.start();
