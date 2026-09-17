@@ -4,6 +4,73 @@
 
 部署路径：`GitHub main → 测试 → AWS 临时身份 → SSM Run Command → EC2 构建镜像 → 替换容器 → HTTP 检查`。
 
+当前仓库：[qinghuai999/DECO-3500-Team-07-Mermer-Coming](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming)。如果已经按旧所有者配置过，先执行下面的转移清单，不用从零重建。
+
+## 仓库已转到 qinghuai999：按此顺序迁移
+
+本清单适用于只转移 GitHub 仓库、继续使用原 AWS 账号和 EC2 的情况。2026-09-17 已通过 GitHub API 核对：新所有者 ID 为 `58069249`，仓库 ID 仍为 `1340324828`，默认分支仍为 `main`。
+
+同日核对到新仓库的 `AWS_ROLE_ARN` 已存在且值正确，并保留了名为 `mermer-ec2-readonly` 的只读 Deploy Key。这两项无需仅因转移而重建；尚未验证 EC2 私钥是否与该公钥匹配，也未修改 AWS 上的信任策略。
+
+| 位置 | 需要做什么 |
+|---|---|
+| 本地仓库文件 | 三个部署/认证脚本与信任策略 JSON 已更新为新所有者；提交并推送这些修改 |
+| 本地 Mac 的 origin | 改成新仓库地址，命令见下方 |
+| AWS IAM 部署角色 | 编辑现有角色的 **Trust relationships**，替换成更新后的完整 JSON |
+| 新仓库 Actions 变量 | 核对 `AWS_ROLE_ARN` 存在且值正确；同一个 AWS 角色无需改 ARN |
+| EC2 工作目录的 origin | 改成新地址，并获取 main 中的新认证脚本 |
+| EC2 的 GitHub 认证 | HTTPS 需要按新仓库路径重新保存凭据；SSH 检查原 Deploy Key 并复用已有密钥 |
+| GitHub 部署运行 | 配置完成后新建一次 Run workflow；不要重跑转移前的旧提交 |
+
+### A. 在 Mac 本地终端：更新 origin，提交并推送
+
+```bash
+cd /Users/sushiqi/Java/IdeaProject/Q/DECO-3500-Team-07-Mermer-Coming
+git remote set-url origin https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming.git
+git remote -v
+```
+
+这里选择 HTTPS，与此前本地 remote 的协议一致。确认要发布的修改后在 IDE 提交并推送到 main，或按分支保护规则通过 PR 合并。仅修改本地文件不会更新 EC2 和 AWS IAM。
+
+### B. 在 AWS 控制台：修改现有角色的信任策略
+
+打开 **IAM → Roles → mermer-github-deploy → Trust relationships → Edit trust policy**，用本仓库 [`aws/github-trust-policy.json`](aws/github-trust-policy.json) 的完整内容替换并保存。
+
+新策略中的两个允许值是：
+
+```text
+repo:qinghuai999/DECO-3500-Team-07-Mermer-Coming:ref:refs/heads/main
+repo:qinghuai999@58069249/DECO-3500-Team-07-Mermer-Coming@1340324828:ref:refs/heads/main
+```
+
+旧所有者的 subject 必须被替换，不能只改仓库 URL。保留角色原来的 `MermerDeployEC2` 权限策略和 OIDC 提供商；同一 AWS 账号、区域、实例下，这些不需要重建。
+
+### C. 在新 GitHub 仓库：核对部署变量
+
+打开 **Settings → Secrets and variables → Actions → Variables**，确认：
+
+```text
+AWS_ROLE_ARN = arn:aws:iam::081999475353:role/mermer-github-deploy
+```
+
+若已存在且值正确，保持原样；缺失才新建。角色名称不需要改成 GitHub 用户名。
+
+### D. 在 EC2 Session Manager：更新远端和认证
+
+先单独执行 `sudo -iu ec2-user`，然后按 [`DEPLOY-EC2.md` 的“仓库转移后的 EC2 更新”](DEPLOY-EC2.md#transfer-ec2) 更新 origin、运行目录中的脚本和 GitHub 认证。那里包含 HTTPS/SSH 两种具体命令，选择原来使用的一种即可。
+
+GitHub 转移会保留 Deploy Keys，因此用 SSH 时先检查新仓库 **Settings → Deploy keys**，通常可以复用原密钥；无需因为转移就删除并重新生成。[GitHub 转移说明](https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository)
+
+HTTPS 凭据则由本项目脚本按仓库路径保存，原路径对应旧所有者，所以必须运行**新版**认证脚本重新保存；Token 本身也必须有读取新仓库的权限。
+
+### E. 新建一次部署
+
+到新仓库 **Actions → Deploy EC2 → Run workflow → main**。不要点旧失败运行的 Re-run：那会重新使用旧提交中的脚本。新运行会检查新提交、获取 AWS 权限并部署。
+
+EC2 实例、公网 IP、DuckDNS、Caddy、Discord 应用及 Token、频道 ID、`bot.env`、Docker 网络和数据卷均不因这次 GitHub 转移而需要修改。仓库本地目录名也可以保持原样。独立部署缓存每次使用脚本中的新 URL 抓取，不需要删除缓存或数据卷。
+
+以下章节保留给首次搭建；已完成迁移清单后，直接使用“以后每次上线”。
+
 ## 1. 把这些文件提交到 GitHub main
 
 在 IDE 中检查并提交 `.github/workflows/` 和 `scripts/`，推送到远端 main。不要提交 bot.env、Token、私钥或运行数据。如果 main 有保护规则，先提交分支再通过 PR 合并。
@@ -63,7 +130,7 @@ sudo -iu ec2-user
 
 本方案依赖现有 Docker、Caddy、`mermer-net` 网络和 `mermer-runtime/bot.env`。**AWS 的临时身份用于控制 EC2；EC2 拉取私有 GitHub 仓库仍然需要 GitHub 读取凭据。**
 
-如果已经按之前脚本保存了 `mermer-runtime/github-credentials`，或者配置过 `setup-github-auth.sh ssh/https`，可以沿用。否则按照 [`DEPLOY-EC2.md`](DEPLOY-EC2.md) 的“第一次安装”和“一次性配置认证”完成一次，推荐只读 Deploy Key。
+如果已为**当前新仓库路径**配置过 `setup-github-auth.sh ssh/https`，可以沿用。若凭据是在转移前配置的，先完成本页迁移清单；尚未配置则按照 [`DEPLOY-EC2.md`](DEPLOY-EC2.md) 的“第一次安装”和“一次性配置认证”完成一次。
 
 可执行以下只读检查，均不会输出 Token：
 

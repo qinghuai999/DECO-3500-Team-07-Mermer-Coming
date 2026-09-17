@@ -136,7 +136,7 @@ class DeployTest(unittest.TestCase):
         self.assertEqual(run.returncode, 0, run.stdout+run.stderr)
         fetch = next(call for call in calls if call[0]=='git' and 'fetch' in call)
         self.assertIn('credential.useHttpPath=true', fetch)
-        self.assertIn('https://github.com/Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming.git', fetch)
+        self.assertIn('https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming.git', fetch)
 
     def test_preflight_fetch_build_and_mount_failures_leave_current_bot_running(self):
         for failure, mount in [('locked','volume:mermer-data'), ('fetch','volume:mermer-data'), ('build','volume:mermer-data'), ('','bind:')]:

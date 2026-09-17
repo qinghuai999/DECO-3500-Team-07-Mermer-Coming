@@ -1,6 +1,7 @@
 """Test the GitHub-to-SSM boundary without contacting AWS or a live bot."""
 import base64
 import importlib.util
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -58,12 +59,23 @@ class SsmTest(unittest.TestCase):
 
     def test_wrong_branch_repository_or_event_never_calls_aws(self):
         for key, value in [('GITHUB_REF', 'refs/heads/feature'), ('GITHUB_REPOSITORY', 'other/repo'),
+                           ('GITHUB_REPOSITORY', 'Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming'),
                            ('GITHUB_EVENT_NAME', 'pull_request')]:
             with self.subTest(key=key), patch.dict(os.environ, {**ENV, key: value}, clear=True), \
                     patch.object(ssm, 'aws_call') as call:
                 with self.assertRaises(ValueError):
                     ssm.main()
                 call.assert_not_called()
+
+    def test_trust_policy_limits_deployment_to_transferred_repository_main(self):
+        policy = json.loads((ssm.ROOT / 'aws/github-trust-policy.json').read_text())
+        condition = policy['Statement'][0]['Condition']['StringEquals']
+        self.assertEqual(ssm.REPOSITORY, 'qinghuai999/DECO-3500-Team-07-Mermer-Coming')
+        self.assertEqual(condition['token.actions.githubusercontent.com:sub'], [
+            f'repo:{ssm.REPOSITORY}:ref:refs/heads/main',
+            'repo:qinghuai999@58069249/DECO-3500-Team-07-Mermer-Coming@1340324828:ref:refs/heads/main',
+        ])
+        self.assertEqual(condition['token.actions.githubusercontent.com:aud'], 'sts.amazonaws.com')
 
     def test_monitor_failure_cancels_known_command_without_second_deploy(self):
         with patch.dict(os.environ, ENV, clear=True), patch.object(ssm.signal, 'signal'), \

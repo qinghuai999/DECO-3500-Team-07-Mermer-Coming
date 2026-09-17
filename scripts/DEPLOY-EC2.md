@@ -4,6 +4,85 @@
 
 要在 GitHub 点按钮触发测试和部署，按 [CI/CD 配置指南](CICD-EC2.md) 操作。本页仍用于 EC2 首次认证配置，以及需要时手动部署。
 
+当前仓库为 [qinghuai999/DECO-3500-Team-07-Mermer-Coming](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming)。已转移仓库的现有 EC2 按下一节操作一次；新机器再看“第一次安装”。
+
+<a id="transfer-ec2"></a>
+## 仓库转移后的 EC2 更新
+
+先在 Mac 将本次新版脚本推送到新仓库 main，再执行以下操作。这里更新的是 EC2 读取 GitHub 的认证；AWS OIDC 信任策略和 GitHub 变量按 [CI/CD 指南](CICD-EC2.md) 另行更新。
+
+### 1. 在 EC2 终端切换用户并更新 origin
+
+在 Session Manager 中先单独执行：
+
+```bash
+sudo -iu ec2-user
+```
+
+然后执行：
+
+```bash
+cd /home/ec2-user/DECO-3500-Team-07-Mermer-Coming
+git remote set-url origin https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming.git
+git fetch origin main
+```
+
+工作目录继续用 HTTPS 拉取这一次更新。若询问用户名，填 `qinghuai999`；Password 填有新仓库读取权限的 GitHub Token。工作目录的 remote 与部署脚本的认证是独立的，之后部署可以选择 SSH。
+
+如果已经使用专用 Deploy Key，且不想用 Token 获取这一次更新，可用以下命令代替上面的 set-url 和 fetch：
+
+```bash
+git remote set-url origin git@github.com:qinghuai999/DECO-3500-Team-07-Mermer-Coming.git
+GIT_SSH_COMMAND='ssh -F /dev/null -i /home/ec2-user/mermer-runtime/github-deploy-key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=/home/ec2-user/mermer-runtime/github-known-hosts -o HostKeyAlgorithms=ssh-ed25519' git fetch origin main
+```
+
+只在密钥、known-hosts 文件已存在且新仓库仍登记了该公钥时使用此替代命令。后续手动 fetch 也需要指定这把专用密钥；自动部署脚本会自行指定。
+
+### 2. fetch 成功后，更新运行目录中的脚本
+
+以下命令先在临时目录验证两个脚本，再安装，避免获取失败时覆盖原脚本。需要整个代码块一起复制执行：
+
+```bash
+(
+  set -eu
+  cd /home/ec2-user/DECO-3500-Team-07-Mermer-Coming
+  script_tmp=$(mktemp -d)
+  trap 'rm -rf -- "$script_tmp"' EXIT
+  git show FETCH_HEAD:scripts/setup-github-auth.sh > "$script_tmp/setup-github-auth.sh"
+  git show FETCH_HEAD:scripts/deploy-main.sh > "$script_tmp/deploy-main.sh"
+  bash -n "$script_tmp/setup-github-auth.sh" "$script_tmp/deploy-main.sh"
+  grep -q "repo='qinghuai999/DECO-3500-Team-07-Mermer-Coming'" "$script_tmp/setup-github-auth.sh"
+  grep -q "repository='qinghuai999/DECO-3500-Team-07-Mermer-Coming'" "$script_tmp/deploy-main.sh"
+  mkdir -p /home/ec2-user/mermer-runtime
+  chmod 700 /home/ec2-user/mermer-runtime
+  install -m 700 "$script_tmp/setup-github-auth.sh" /home/ec2-user/mermer-runtime/setup-github-auth.sh
+  install -m 700 "$script_tmp/deploy-main.sh" /home/ec2-user/mermer-runtime/deploy-main.sh
+  echo 'Updated scripts for qinghuai999.'
+)
+```
+
+看到 `Updated scripts for qinghuai999.` 才继续。否则先确认本地更新已经推到新仓库 main，并且刚才 fetch 成功。这里不切换原工作目录的分支，也不覆盖 `bot.env` 或运行数据。
+
+### 3. 按原认证方式二选一
+
+**原来使用 HTTPS Token：必须重新保存一次新路径的凭据。**
+
+```bash
+bash /home/ec2-user/mermer-runtime/setup-github-auth.sh https
+```
+
+输入 `qinghuai999` 和有新仓库读取权限的 Token。脚本会将凭据限定到新仓库路径。原 Token 若仍有权限可以复用；如果使用 fine-grained Token，检查 Resource owner 为 `qinghuai999`、选择新仓库并至少授予 Contents 读取权限，必要时创建新的 Token。不要直接在终端打印凭据文件。
+
+**原来使用 SSH Deploy Key：复用原密钥并确认 GitHub 登记。**
+
+```bash
+bash /home/ec2-user/mermer-runtime/setup-github-auth.sh ssh
+```
+
+已有密钥会复用，脚本只显示公钥。在新仓库 **Settings → Deploy keys** 检查这把公钥是否存在；存在就无需重复添加，缺失才添加，并保持只读。转移保留 Deploy Keys 的行为见 [GitHub 官方说明](https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository)。
+
+两种方式只选一种，后运行的方式会成为自动部署使用的方式。完成后回 GitHub 新建 **Deploy EC2 → Run workflow → main**，无需在 EC2 再手动启动部署。
+
 ## 先把本地修改推送到 main
 
 AWS 只能拿到 GitHub 上的提交。本地未提交、未推送的功能修改和本目录脚本不会被部署。
@@ -21,6 +100,7 @@ sudo -iu ec2-user
 
 ```bash
 cd /home/ec2-user/DECO-3500-Team-07-Mermer-Coming
+git remote set-url origin https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming.git
 mkdir -p /home/ec2-user/mermer-runtime
 chmod 700 /home/ec2-user/mermer-runtime
 git fetch origin main
@@ -78,7 +158,7 @@ GitHub 官方说明：[Deploy keys 与 HTTPS Token](https://docs.github.com/en/a
 bash /home/ec2-user/mermer-runtime/deploy-main.sh
 ```
 
-脚本固定拉取 `Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming` 的远端 `main`，不依赖你当前所在目录或当前 Git 分支。
+脚本固定拉取 `qinghuai999/DECO-3500-Team-07-Mermer-Coming` 的远端 `main`，不依赖你当前所在目录或当前 Git 分支。仓库转移后需先更新运行目录中的旧脚本，步骤见本页迁移说明。
 
 流程：
 

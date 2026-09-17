@@ -6,7 +6,7 @@ umask 077
 
 runtime="${MERMER_RUNTIME_DIR:-/home/ec2-user/mermer-runtime}"
 mode="${1:-ssh}"
-repo='Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming'
+repo='qinghuai999/DECO-3500-Team-07-Mermer-Coming'
 mkdir -p "$runtime"
 chmod 700 "$runtime"
 

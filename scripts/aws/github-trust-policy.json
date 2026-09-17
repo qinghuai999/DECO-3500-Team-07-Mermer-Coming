@@ -11,8 +11,8 @@
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
           "token.actions.githubusercontent.com:sub": [
-            "repo:Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming:ref:refs/heads/main",
-            "repo:Arthur-Arcadia@201037860/DECO-3500-Team-07-Mermer-Coming@1340324828:ref:refs/heads/main"
+            "repo:qinghuai999/DECO-3500-Team-07-Mermer-Coming:ref:refs/heads/main",
+            "repo:qinghuai999@58069249/DECO-3500-Team-07-Mermer-Coming@1340324828:ref:refs/heads/main"
           ]
         }
       }

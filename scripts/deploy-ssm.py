@@ -14,7 +14,7 @@ import time
 ROOT = Path(__file__).resolve().parent
 REGION = 'ap-southeast-2'
 INSTANCE = 'i-0fb34ffbb056595e0'
-REPOSITORY = 'Arthur-Arcadia/DECO-3500-Team-07-Mermer-Coming'
+REPOSITORY = 'qinghuai999/DECO-3500-Team-07-Mermer-Coming'
 
 
 class AwsError(RuntimeError):
