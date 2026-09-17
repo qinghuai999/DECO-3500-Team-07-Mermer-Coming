@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DeployOnlyToMermerEC2",
+      "Effect": "Allow",
+      "Action": "ssm:SendCommand",
+      "Resource": [
+        "arn:aws:ec2:ap-southeast-2:081999475353:instance/i-0fb34ffbb056595e0",
+        "arn:aws:ssm:ap-southeast-2::document/AWS-RunShellScript"
+      ]
+    },
+    {
+      "Sid": "MonitorAndCancelRunCommands",
+      "Effect": "Allow",
+      "Action": ["ssm:GetCommandInvocation", "ssm:CancelCommand"],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {"aws:RequestedRegion": "ap-southeast-2"}
+      }
+    }
+  ]
+}

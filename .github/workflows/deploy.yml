@@ -1,0 +1,53 @@
+name: Deploy EC2
+run-name: Deploy main to EC2 · ${{ github.actor }}
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Do not cancel a deployment in the middle of a container replacement.
+concurrency:
+  group: mermer-ec2-production
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+
+  deploy:
+    name: Deploy tested main through SSM
+    needs: tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ap-southeast-2
+      EC2_INSTANCE_ID: i-0fb34ffbb056595e0
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Check deployment configuration
+        run: |
+          [[ "$GITHUB_REF" == refs/heads/main ]] || exit 1
+          if [[ -z "$AWS_ROLE_ARN" ]]; then
+            echo '::error::Set repository Actions variable AWS_ROLE_ARN. See scripts/CICD-EC2.md.'
+            exit 1
+          fi
+          command -v aws >/dev/null
+      - name: Get temporary AWS credentials with GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: mermer-${{ github.run_id }}
+          role-duration-seconds: 1800
+      - name: Deploy and wait for the EC2 result
+        run: python3 scripts/deploy-ssm.py

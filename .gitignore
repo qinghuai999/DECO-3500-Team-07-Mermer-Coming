@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+discord-example-app/data/
 
 # Local environment and credentials (keep placeholder templates)
 .env
