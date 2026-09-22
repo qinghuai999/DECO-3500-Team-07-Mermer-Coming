@@ -1,4 +1,4 @@
-# XYZ – Post-Test Interview Transcript (English)
+# Post-Test Interview Transcript (English)
 
 **Speaker 1:** When you were using the feedback tool just now, everyone could give feedback about another person without revealing who submitted it.
 
