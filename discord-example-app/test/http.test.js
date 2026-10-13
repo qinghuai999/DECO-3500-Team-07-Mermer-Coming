@@ -11,11 +11,11 @@ test('signed HTTP routes exercise Exit, Social, editable Portrait with replies a
   const keys = generateKeyPairSync('ed25519');
   const publicKey = keys.publicKey.export({ type: 'spki', format: 'der' }).subarray(-32).toString('hex');
   const writes = [];
-  let finishDelivery;
+  let finishDelivery, awaited = 'PATCH';
   const delivered = new Promise(resolve => { finishDelivery = resolve; });
   const api = async (path, options) => {
       writes.push({ path, ...options });
-      if (options.method === 'PATCH') finishDelivery();
+      if (options.method === awaited) finishDelivery();
       return { id: '444444444444444444' };
   };
   let clock = 100_000, endRound, pickerStep;
@@ -73,9 +73,12 @@ test('signed HTTP routes exercise Exit, Social, editable Portrait with replies a
     assert.equal(writes[2].body.components[0].components.length, 3);
     assert.equal(JSON.stringify(writes[2].body).includes(base.member.user.id), false);
     const portraitDone = new Promise(resolve => { finishDelivery = resolve; });
-    assert.deepEqual(await post({ ...base, id: '999999999999999998', data: { custom_id: PANEL_ACTIONS.portrait } }),
-      { type: 5, data: { flags: 64 } });
+    awaited = 'POST'; // A successful start sends nothing privately, so wait for the public message itself.
+    assert.deepEqual(await post({ ...base, id: '999999999999999998', data: { custom_id: PANEL_ACTIONS.portrait } }), { type: 6 });
     await portraitDone;
+    awaited = 'PATCH';
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(writes.length, 5);
     assert.equal(writes[4].path, 'channels/222222222222222222/messages');
     assert.equal(writes[4].body.interaction_metadata, undefined);
     const open = writes[4].body.components[0].components[0].custom_id;
@@ -102,9 +105,12 @@ test('signed HTTP routes exercise Exit, Social, editable Portrait with replies a
       components: [{ type: 1, components: [{ type: 4, custom_id: 'text', value: 'Fair enough.' }] }] } }), { type: 5, data: { flags: 64 } });
     await replyDone;
     const pickerDone = new Promise(resolve => { finishDelivery = resolve; });
-    assert.deepEqual(await post({ ...base, id: '999999999999999997', data: { custom_id: PANEL_ACTIONS.picker } }),
-      { type: 5, data: { flags: 64 } });
+    awaited = 'POST';
+    assert.deepEqual(await post({ ...base, id: '999999999999999997', data: { custom_id: PANEL_ACTIONS.picker } }), { type: 6 });
     await pickerDone;
+    awaited = 'PATCH';
+    await new Promise(resolve => setImmediate(resolve));
+    assert.ok(writes.at(-1).path.startsWith('channels/'));
     const pickerMessage = writes.findLast(call => call.path.startsWith('channels/')).body;
     assert.match(pickerMessage.content, /Finding players/);
     assert.equal(pickerMessage.interaction_metadata, undefined);

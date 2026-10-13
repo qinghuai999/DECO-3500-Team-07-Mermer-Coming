@@ -27,7 +27,7 @@
   {
     "id": 6,
     "text": "I spilled coffee on my keyboard. Now it will only type 'one more espresso'.",
-    "category": "blame"
+    "category": "defence"
   },
   {
     "id": 7,
@@ -77,7 +77,7 @@
   {
     "id": 16,
     "text": "Reality is dropping frames. I need to step outside and install a patch.",
-    "category": "blame"
+    "category": "defence"
   },
   {
     "id": 17,
@@ -226,42 +226,42 @@
   },
   {
     "id": 46,
-    "category": "blame",
+    "category": "defence",
     "text": "It's not my fault. My mouse has clearly chosen violence today."
   },
   {
     "id": 47,
-    "category": "blame",
+    "category": "defence",
     "text": "You need to blame the Wi-Fi. The packets stopped halfway to admire a butterfly."
   },
   {
     "id": 48,
-    "category": "blame",
+    "category": "defence",
     "text": "My keyboard translated 'retreat' into 'perform a dramatic solo entrance'. I'm filing a complaint."
   },
   {
     "id": 49,
-    "category": "blame",
+    "category": "defence",
     "text": "That wasn't a missed shot. Gravity changed its terms and conditions without notifying me."
   },
   {
     "id": 50,
-    "category": "blame",
+    "category": "defence",
     "text": "My monitor is showing the director's cut. Everyone else apparently got the useful version."
   },
   {
     "id": 51,
-    "category": "blame",
+    "category": "defence",
     "text": "The lag is powered by a hamster who just discovered paid leave."
   },
   {
     "id": 52,
-    "category": "blame",
+    "category": "defence",
     "text": "My controller outsourced that move to a confused toaster. We are reviewing the contract."
   },
   {
     "id": 53,
-    "category": "blame",
+    "category": "defence",
     "text": "The hitbox briefly moved to another postcode. I respect its privacy, but I object to the timing."
   },
   {

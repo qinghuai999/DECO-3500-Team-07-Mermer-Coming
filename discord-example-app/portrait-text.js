@@ -1,41 +1,23 @@
+import { readFileSync } from 'node:fs';
+
+// Every title and sentence is written by hand in portrait-lines.json: one entry per word and one per pair of words.
+const lines = JSON.parse(readFileSync(new URL('./portrait-lines.json', import.meta.url), 'utf8'));
 // Fixed gameplay vocabulary; descriptions are about play, not personal identity.
+export const WORDS = Object.keys(lines.words);
+// Each word is offered in exactly one group, and every group mixes praise, teasing and neutral words.
 export const WORD_GROUPS = [
-  ['supportive', 'strategic', 'funny', 'creative', 'patient', 'adaptable', 'encouraging'],
-  ['reckless', 'distracted', 'hesitant', 'energetic', 'supportive', 'strategic', 'lucky'],
-  ['impatient', 'overconfident', 'chaotic', 'cautious', 'funny', 'creative', 'adventurous'],
+  ['supportive', 'creative', 'stubborn', 'quiet', 'funny', 'impatient', 'patient', 'competitive'],
+  ['strategic', 'reckless', 'lucky', 'clutch', 'distracted', 'energetic', 'greedy', 'talkative'],
+  ['adaptable', 'hesitant', 'cautious', 'encouraging', 'overconfident', 'adventurous', 'chaotic', 'sneaky'],
 ];
-export const WORDS = [...new Set(WORD_GROUPS.flat())];
 export const wordLabel = word => word[0].toUpperCase() + word.slice(1);
-const phrases = {
-  supportive: 'supportive when a teammate needs a hand', strategic: 'strategic with every tiny advantage',
-  funny: 'funny even when the mission goes sideways', creative: 'creative with unexpected obstacles',
-  patient: 'patient through the longest loading screens', adaptable: 'adaptable when the plan changes',
-  encouraging: 'encouraging after a spectacular team wipe', reckless: 'reckless around mysterious red buttons',
-  distracted: 'distracted by every shiny side quest', hesitant: 'hesitant at the boss-room door',
-  energetic: 'energetic enough to power the respawn screen', lucky: 'lucky when the dice escape gravity',
-  impatient: 'impatient with doors that open too slowly', overconfident: 'overconfident before checking the health bar',
-  chaotic: 'chaotic when the plan meets reality', cautious: 'cautious around suspicious treasure chests',
-  adventurous: 'adventurous on every detour',
-};
-const titles = {
-  supportive: 'The Team’s Emergency Lighthouse', strategic: 'The Pocket-Sized Grandmaster',
-  funny: 'The Respawn Comedy Club', creative: 'The Improvised Strategy Department',
-  patient: 'The Unshakeable Quest Captain', adaptable: 'The Walking Backup Plan',
-  encouraging: 'The Portable Pep-Talk Machine', reckless: 'The Red-Button Expedition Leader',
-  distracted: 'The Side Quest Magnet', hesitant: 'The Boss-Door Philosopher',
-  energetic: 'The Human Loading Screen Skip', lucky: 'The Fortune Cookie Champion',
-  impatient: 'The Fast-Forward Adventurer', overconfident: 'The One-HP Victory Announcer',
-  chaotic: 'The Accidental Fireworks Director', cautious: 'The Seatbelt-equipped Explorer',
-  adventurous: 'The Side Quest Navigator',
-};
+const lean = word => ({ positive: 1, negative: -1 })[lines.words[word].tone] ?? 0;
 
 // A portrait's tone decides which replies the selected player is offered.
-const PRAISE = ['supportive', 'strategic', 'funny', 'creative', 'patient', 'adaptable', 'encouraging'];
-const TEASE = ['reckless', 'distracted', 'hesitant', 'impatient', 'overconfident', 'chaotic'];
 export function portraitTone(input) {
   const words = WORDS.filter(word => input.includes(word));
   if (!words.length) return null;
-  const praised = words.some(word => PRAISE.includes(word)), teased = words.some(word => TEASE.includes(word));
+  const praised = words.some(word => lean(word) > 0), teased = words.some(word => lean(word) < 0);
   // Praise mixed with teasing, or only neutral words, gets the non-committal replies.
   return praised === teased ? 'neutral' : praised ? 'positive' : 'negative';
 }
@@ -79,17 +61,28 @@ export const REPLIES = {
   ],
 };
 
+// The result depends only on which words were chosen, never on who chose them, how often, or in what order.
 export function portraitText(input) {
   const words = WORDS.filter(word => input.includes(word));
-  if (!words.length) return {
-    title: 'The Unwritten Legend',
-    sentence: 'No traits were submitted this time. This player’s next adventure is still a blank page.',
-  };
-  let title = titles[words[0]];
-  if (words.includes('strategic') && words.includes('chaotic')) title = 'The Strategist with a Confetti Cannon';
-  else if (words.includes('patient') && words.includes('impatient')) title = 'The Zen Master of Fast Forward';
-  else if (words.includes('lucky') && words.includes('adventurous')) title = 'The Accidental Expedition Leader';
-  const parts = words.map(word => phrases[word]);
-  const joined = parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}`;
-  return { title, sentence: `In the team's eyes, this player is ${joined}. Together, these traits turn an ordinary mission into a story worth retelling.` };
+  if (!words.length) return { ...lines.blank };
+  if (words.length === 1) return { title: lines.words[words[0]].title, sentence: lines.words[words[0]].sentence };
+  // Three or more words are told pair by pair. Praise is paired with teasing first, because contrast reads best.
+  const left = [...words], told = [];
+  while (left.length > 1) {
+    let pick;
+    for (let a = 0; a < left.length; a++) for (let b = a + 1; b < left.length; b++) {
+      const contrast = Math.abs(lean(left[a]) - lean(left[b]));
+      if (!pick || contrast > pick.contrast) pick = { a, b, contrast };
+    }
+    told.push(lines.pairs[`${left[pick.a]}+${left[pick.b]}`]);
+    left.splice(pick.b, 1);
+    left.splice(pick.a, 1);
+  }
+  const sentences = told.map(([, sentence]) => sentence);
+  if (left.length) {
+    // The word without a partner gets its own closing line; which of its lines depends on the whole combination.
+    const closing = lines.words[left[0]].extra;
+    sentences.push(closing[words.reduce((sum, word) => sum + WORDS.indexOf(word), 0) % closing.length]);
+  }
+  return { title: told[0][0], sentence: sentences.join(' ') };
 }

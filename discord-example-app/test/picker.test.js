@@ -47,10 +47,13 @@ test('anonymous draw shows finding, rolling, result in one message and finishes 
   }
   const trigger = request();
   const start = h.picker.handle(trigger);
-  assert.deepEqual(start.response, { type: 5, data: { flags: 64 } });
+  assert.deepEqual(start.response, { type: 6 }); // Silent: no private message accompanies a successful start.
   assert.equal(h.calls.length, 0);
-  assert.match(h.picker.handle(request()).response.data.content, /already in progress/);
+  const second = h.picker.handle(request()).response;
+  assert.match(second.data.content, /already in progress/);
+  assert.equal(second.data.flags, 64);
   await start.afterReply();
+  assert.equal(h.calls.length, 1);
   const initial = h.current();
   assert.match(initial.body.content, /Finding players/);
   assert.equal(initial.body.message_reference, undefined);
@@ -139,7 +142,11 @@ test('API failures release locks and disk failures prevent a draw; no duplicate 
   await h.start();
   assert.equal(h.state().active, null);
   assert.deepEqual(h.state().seen, []);
-  assert.equal(h.calls.filter(call => call.method === 'POST').length, 1);
+  assert.equal(h.calls.filter(call => call.method === 'POST' && call.path.startsWith('channels/')).length, 1);
+  // A failed start is the one case that is reported privately, as a follow-up and never by editing the panel.
+  const note = h.calls.at(-1);
+  assert.deepEqual([note.method, note.path, note.body.flags], ['POST', 'webhooks/100000000000000099/private-token', 64]);
+  assert.match(note.body.content, /Could not confirm/);
   failing = null;
   await h.start();
   failing = 'PATCH'; await h.advance(600);

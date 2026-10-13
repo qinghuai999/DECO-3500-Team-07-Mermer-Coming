@@ -32,6 +32,10 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
   async function editPrivate(body, content) {
     await api(`webhooks/${body.application_id}/${body.token}/messages/@original`, { method: 'PATCH', body: closed(content) });
   }
+  // A follow-up, never an edit of @original: after a silent acknowledgement, @original is the public panel.
+  async function privateNote(body, content) {
+    await api(`webhooks/${body.application_id}/${body.token}`, { method: 'POST', body: { ...closed(content), flags: 64 } });
+  }
   function privateStatus(round, user) {
     if (round.cancelReason) return 'This round has ended. Start a new Trait Picker from /social.';
     if (round.submitted.has(user)) return `✅ Submitted: **${wordLabel(round.submitted.get(user))}**. ${round.status === 'open' ? 'Collecting the other players’ responses…' : 'This round has ended.'}`;
@@ -132,7 +136,8 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     try { save(); } catch { active = null; seen = previousSeen; report(); return reply('Trait Picker could not save its state. Please ask the developer to check the data volume.'); }
     requests.set(body.id, now() + 15 * 60 * 1000);
     return {
-      response: { type: 5, data: { flags: 64 } },
+      // Acknowledge silently: the public round is the confirmation. Only a failed start is reported privately.
+      response: { type: 6 },
       afterReply: async () => {
         try {
           round.deadline = now() + duration;
@@ -162,10 +167,8 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
             if (error.status && error.status < 500) seen = previousSeen;
             try { save(); } catch { report(); }
           }
-          await editPrivate(body, 'Could not start Trait Picker. Check the channel before trying again.');
-          return;
+          await privateNote(body, 'Could not start Trait Picker. Check the channel before trying again.');
         }
-        await editPrivate(body, 'Trait Picker has been posted in this channel.');
       },
     };
   }
@@ -183,7 +186,8 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
       ...(initial ? { flags: 64 } : {}),
       content: `🎨 **How would you describe <@${round.target}>'s performance?**\nChoose **one word**. You can change it until you press **Submit**.\n${selected ? `Selected: **${wordLabel(selected)}** — not submitted yet.` : 'No word selected yet.'}\nYour last choice is submitted automatically <t:${Math.floor(round.deadline / 1000)}:R>. Other… shows more words without extending the time.`,
       allowed_mentions: mentions,
-      components: [0, 3, 6].map(start => ({ type: 1, components: buttons.slice(start, start + 3) })),
+      // Two rows of four words, then Other… and Submit on a row of their own.
+      components: [0, 4, 8].map(start => ({ type: 1, components: buttons.slice(start, start + 4) })),
     } } };
   }
   function visibleWords(round, user) {

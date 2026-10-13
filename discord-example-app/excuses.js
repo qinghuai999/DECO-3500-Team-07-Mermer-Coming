@@ -7,7 +7,7 @@ export const EXCUSE_CATEGORIES = [
   { id: 'leave', label: 'Leave', emoji: '🚪', description: 'I wanna go' },
   { id: 'decline', label: 'Decline', emoji: '✋', description: 'Not this time' },
   { id: 'cancel', label: 'Cancel', emoji: '📅', description: "Can't make it" },
-  { id: 'blame', label: 'Blame', emoji: '👉', description: 'Not my fault' },
+  { id: 'defence', label: 'Defence', emoji: '👉', description: 'Not my fault' },
   { id: 'delay', label: 'Delay', emoji: '⏰', description: 'Maybe later' },
   { id: 'surprise', label: 'Surprise Me', emoji: '🎲', description: "I'm feeling lucky" },
 ];

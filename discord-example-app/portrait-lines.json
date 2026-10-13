@@ -1,0 +1,499 @@
+{
+  "blank": {"title":"The Unwritten Legend","sentence":"No traits were submitted this time. This player's next adventure is still a blank page."},
+  "words": {
+    "supportive": {
+      "tone": "positive",
+      "title": "The Team's Emergency Lighthouse",
+      "sentence": "Whenever a teammate went down this round, a supportive figure was already on the way with a medkit and a pep talk.",
+      "extra": [
+        "And through all of it, still supportive enough to drag a teammate back to safety.",
+        "Somewhere in the middle of that, a supportive hand pulled someone out of trouble."
+      ]
+    },
+    "strategic": {
+      "tone": "positive",
+      "title": "The Pocket-Sized Grandmaster",
+      "sentence": "Somebody spent this round playing chess while everyone else played tag. A strategic performance down to the last move.",
+      "extra": [
+        "There was, apparently, a strategic reason for all of it.",
+        "The team suspects every bit of that was part of a strategic master plan."
+      ]
+    },
+    "funny": {
+      "tone": "positive",
+      "title": "The Respawn Comedy Club",
+      "sentence": "The match may have gone sideways, but the commentary was genuinely funny from the first respawn to the last.",
+      "extra": [
+        "And it was funny the entire way through, which counts for a lot.",
+        "Whatever else happened, the running commentary was funny enough to save the evening."
+      ]
+    },
+    "creative": {
+      "tone": "positive",
+      "title": "The Improvised Strategy Department",
+      "sentence": "Nobody else would have thought to solve that problem with a chair and a grappling hook. A truly creative round.",
+      "extra": [
+        "Points also go to one creative solution that no guide would ever recommend.",
+        "Add a creative workaround or two, and the round starts to make sense."
+      ]
+    },
+    "patient": {
+      "tone": "positive",
+      "title": "The Unshakeable Quest Captain",
+      "sentence": "Three wipes, two loading screens and one escort mission later, this patient player had not sighed even once.",
+      "extra": [
+        "And all of it was handled by someone patient enough to wait out the longest loading screen.",
+        "Through every restart this player stayed patient, which is more than the rest of the team managed."
+      ]
+    },
+    "adaptable": {
+      "tone": "positive",
+      "title": "The Walking Backup Plan",
+      "sentence": "The plan changed four times this round, and this adaptable player was already doing the new one each time.",
+      "extra": [
+        "When things changed, this player was adaptable enough to act like it was the plan all along.",
+        "Luckily, an adaptable mind had a new plan ready before the old one finished failing."
+      ]
+    },
+    "encouraging": {
+      "tone": "positive",
+      "title": "The Portable Pep-Talk Machine",
+      "sentence": "Even after a spectacular team wipe, one encouraging voice insisted the next attempt would be the one.",
+      "extra": [
+        "And an encouraging word arrived right when morale needed it.",
+        "The whole time, this player kept up an encouraging stream of \"we've got this\"."
+      ]
+    },
+    "clutch": {
+      "tone": "positive",
+      "title": "The Last-Second Specialist",
+      "sentence": "With one health point and no time left, this player pulled off the clutch play that the team will be retelling for weeks.",
+      "extra": [
+        "Then, with everything on the line, came the clutch moment that fixed it.",
+        "And when it finally mattered, the clutch finish was right on time."
+      ]
+    },
+    "reckless": {
+      "tone": "negative",
+      "title": "The Red-Button Expedition Leader",
+      "sentence": "If there was a button marked \"do not press\", this reckless explorer pressed it twice to be sure.",
+      "extra": [
+        "Then came one reckless detour that nobody will forget.",
+        "There was also a reckless dash through the one room everybody agreed to avoid."
+      ]
+    },
+    "distracted": {
+      "tone": "negative",
+      "title": "The Side Quest Magnet",
+      "sentence": "The objective was straight ahead. This distracted wanderer went left, to look at a particularly interesting rock.",
+      "extra": [
+        "For part of it, this player was distracted by something shiny off the edge of the map.",
+        "Somewhere along the way a side quest appeared, and a distracted hero went to take a look."
+      ]
+    },
+    "hesitant": {
+      "tone": "negative",
+      "title": "The Boss-Door Philosopher",
+      "sentence": "The boss door stood open for a full minute while this hesitant hero considered every possible outcome.",
+      "extra": [
+        "There was also a hesitant pause at the doorway while the options were weighed.",
+        "Before any of that, a hesitant moment at the threshold lasted slightly longer than planned."
+      ]
+    },
+    "impatient": {
+      "tone": "negative",
+      "title": "The Fast-Forward Adventurer",
+      "sentence": "Doors, cutscenes and countdowns all learned the same lesson this round: this player is far too impatient to wait for them.",
+      "extra": [
+        "All of it happened at speed, because this player was far too impatient to slow down.",
+        "The countdown had barely started before an impatient thumb skipped it."
+      ]
+    },
+    "overconfident": {
+      "tone": "negative",
+      "title": "The One-HP Victory Announcer",
+      "sentence": "Victory was announced at one health point and with three enemies still standing. An overconfident forecast, as it turned out.",
+      "extra": [
+        "Along the way came one overconfident victory speech, delivered slightly too early.",
+        "The health bar disagreed with one overconfident prediction, but the delivery was flawless."
+      ]
+    },
+    "chaotic": {
+      "tone": "negative",
+      "title": "The Accidental Fireworks Director",
+      "sentence": "Nobody knows what the plan was, including this player. A chaotic round, with a surprising number of explosions.",
+      "extra": [
+        "The rest was a chaotic blur that the replay still cannot explain.",
+        "And then things got chaotic, in a way that no briefing covered."
+      ]
+    },
+    "stubborn": {
+      "tone": "negative",
+      "title": "The Immovable Objective",
+      "sentence": "The same door, the same approach, seven attempts. This stubborn challenger was certain the eighth would work.",
+      "extra": [
+        "Meanwhile, a stubborn refusal to change the route carried on regardless.",
+        "The plan stayed exactly the same throughout, thanks to one stubborn believer."
+      ]
+    },
+    "greedy": {
+      "tone": "negative",
+      "title": "The Loot Goblin in Chief",
+      "sentence": "Every chest, crate and suspicious barrel was emptied before the team arrived. A greedy round, and a very full backpack.",
+      "extra": [
+        "On the way, a greedy hand found its way into every loot chest.",
+        "The backpack tells its own story: this player was greedy with the loot again."
+      ]
+    },
+    "energetic": {
+      "tone": "neutral",
+      "title": "The Human Loading Screen Skip",
+      "sentence": "While the team was still reading the mission brief, this energetic player had already circled the map twice.",
+      "extra": [
+        "All of it was done by someone energetic enough to power the respawn screen.",
+        "And through the whole round, this player stayed energetic enough for the entire squad."
+      ]
+    },
+    "lucky": {
+      "tone": "neutral",
+      "title": "The Fortune Cookie Champion",
+      "sentence": "The dice rolled, bounced off a wall and landed exactly where this lucky player needed them.",
+      "extra": [
+        "And somehow lucky enough to walk away without a scratch.",
+        "The lucky bounce at the end did not hurt either."
+      ]
+    },
+    "cautious": {
+      "tone": "neutral",
+      "title": "The Seatbelt-Equipped Explorer",
+      "sentence": "Every corner was checked and every chest was poked with a stick first. A cautious expedition from start to finish.",
+      "extra": [
+        "Credit where due: one cautious peek around the corner saved the day.",
+        "Before any of it, a cautious check for traps came first."
+      ]
+    },
+    "adventurous": {
+      "tone": "neutral",
+      "title": "The Side Quest Navigator",
+      "sentence": "The marked path was right there. This adventurous traveller took the unmarked one, and found a whole new area.",
+      "extra": [
+        "There was also an adventurous detour through a part of the map nobody had opened yet.",
+        "Somewhere in there, an adventurous shortcut turned into the scenic route."
+      ]
+    },
+    "quiet": {
+      "tone": "neutral",
+      "title": "The Stealth-Mode Teammate",
+      "sentence": "Not a word on voice chat, and then the objective was simply done. A quiet round with loud results.",
+      "extra": [
+        "Most of it was done by someone so quiet that the team checked the connection twice.",
+        "And the whole time, this player stayed quiet and let the scoreboard do the talking."
+      ]
+    },
+    "talkative": {
+      "tone": "neutral",
+      "title": "The Play-by-Play Announcer",
+      "sentence": "Every step, every reload and every snack was narrated live. A talkative round, and nobody had to check the minimap.",
+      "extra": [
+        "All of it came with live narration from a very talkative commentator.",
+        "The team heard about every second of it, because this player was feeling talkative."
+      ]
+    },
+    "sneaky": {
+      "tone": "neutral",
+      "title": "The Shadow in the Corner",
+      "sentence": "Nobody saw this player for most of the round, and then the flag was gone. A sneaky piece of work.",
+      "extra": [
+        "Then came a sneaky route around the back that nobody saw coming.",
+        "Part of it happened out of sight, courtesy of one sneaky shortcut."
+      ]
+    },
+    "competitive": {
+      "tone": "neutral",
+      "title": "The Scoreboard Watcher",
+      "sentence": "It was announced as a casual round. This competitive player was checking the scoreboard before the countdown ended.",
+      "extra": [
+        "For the record, a competitive eye was on the scoreboard the whole time.",
+        "And being competitive, this player has already asked for a rematch."
+      ]
+    }
+  },
+  "pairs": {
+    "supportive+strategic": ["The Squad's Air Traffic Controller", "Supportive enough to cover every teammate and strategic enough to know exactly where they should be standing."],
+    "supportive+funny": ["The Medic With a Microphone", "Revives arrive with a joke attached: a supportive teammate who is funny even while carrying the squad to safety."],
+    "supportive+creative": ["The Duct-Tape Guardian Angel", "A supportive teammate with a creative streak: help always arrives, just never by the route anyone expected."],
+    "supportive+patient": ["The Tutorial Everyone Deserves", "Supportive and patient in the same round: explained the mechanic four times and cheered on the fifth attempt."],
+    "supportive+adaptable": ["The Swiss Army Teammate", "Whatever the squad was missing, this adaptable player became it. Supportive in three different roles before the first checkpoint."],
+    "supportive+encouraging": ["The Team's Group Hug", "Supportive with the heals and encouraging on the mic. Morale has never been this well looked after."],
+    "supportive+clutch": ["The Last-Second Lifeguard", "A supportive teammate all round, and then one clutch revive with half a second left to prove it."],
+    "supportive+reckless": ["The Paramedic Who Runs Into Fires", "Always supportive, occasionally reckless: the first to revive a teammate, usually from somewhere nobody should be standing."],
+    "supportive+distracted": ["The Helper Who Took the Scenic Route", "Genuinely supportive, once the distracted detour past three side quests was over. The help was worth the wait."],
+    "supportive+hesitant": ["The Careful Guardian", "A supportive presence behind the team and a hesitant one in front of it. Nobody was left behind, mostly because nobody went first."],
+    "supportive+impatient": ["The Speedrunning Medic", "A supportive teammate with an impatient streak: you will be rescued, but please hurry up about it."],
+    "supportive+overconfident": ["The Bodyguard Who Promised Too Much", "Supportive to the end and overconfident from the start: \"I'll cover all of you\" was a big offer from someone on one health point."],
+    "supportive+chaotic": ["The Whirlwind With a First-Aid Kit", "Help arrived from every direction at once. A supportive effort delivered in the most chaotic way available."],
+    "supportive+stubborn": ["The Rescuer Who Would Not Leave", "Too stubborn to abandon a downed teammate and too supportive to try. The revive took four attempts and was never in doubt."],
+    "supportive+greedy": ["The Generous Loot Goblin", "Greedy at every chest and supportive at every fight: the backpack was full, but the potions were shared."],
+    "supportive+energetic": ["The Tireless Team Engine", "An energetic blur with a supportive mission: every teammate was checked on, twice, at a sprint."],
+    "supportive+lucky": ["The Four-Leaf Clover Medic", "Supportive by choice and lucky by nature. Help arrived on time mostly because the dice wanted it to."],
+    "supportive+cautious": ["The Team's Safety Officer", "Supportive and cautious in equal measure: nobody gets left behind, and nobody opens that chest without a second opinion."],
+    "supportive+adventurous": ["The Tour Guide With a Medkit", "Adventurous enough to lead the squad off the map and supportive enough to get every one of them back."],
+    "supportive+quiet": ["The Silent Guardian", "Never said a word, never missed a heal. A quiet round from the most supportive player on the team."],
+    "supportive+talkative": ["The Helpline in Your Headset", "A supportive teammate and a talkative one: every heal came with advice, a compliment and a weather update."],
+    "supportive+sneaky": ["The Invisible Backup", "A sneaky figure nobody noticed, until the revive came from nowhere. Supportive work done entirely from the shadows."],
+    "supportive+competitive": ["The Captain Who Wants Everyone to Win", "Competitive about the scoreboard and supportive about the squad: this player wants first place, for all of you."],
+    "strategic+funny": ["The Tactician With Punchlines", "A strategic briefing that doubled as a stand-up set. The plan worked, and it was funny enough that people listened."],
+    "strategic+creative": ["The Inventor of Plan Z", "Strategic thinking with a creative twist: the plan was sound, it just involved a ladder nobody knew the game had."],
+    "strategic+patient": ["The Long-Game Legend", "Strategic enough to set the trap and patient enough to wait eleven minutes for it to work."],
+    "strategic+adaptable": ["The Live-Updating Game Plan", "A strategic plan that survived contact with the enemy, only because this adaptable player rewrote it mid-fight."],
+    "strategic+encouraging": ["The Coach With a Whiteboard", "Strategic on the whiteboard and encouraging in the huddle: everyone knew the plan and believed it might work."],
+    "strategic+clutch": ["The Checkmate at the Buzzer", "A strategic setup all round, cashed in with a clutch finish that looked planned. It probably was."],
+    "strategic+reckless": ["The Grandmaster Who Flips the Board", "Drew up a strategic masterpiece, then made the reckless decision to ignore it in the first ten seconds."],
+    "strategic+distracted": ["The Genius Who Left the Room", "The strategic plan was excellent. Its author, distracted by a side quest, was not there to see it happen."],
+    "strategic+hesitant": ["The Planner at the Starting Line", "A strategic mind with a hesitant trigger finger: the plan was perfect, and still being reviewed when the round began."],
+    "strategic+impatient": ["The Three-Moves-Ahead Sprinter", "Strategic enough to plan three moves ahead, too impatient to wait for the second one."],
+    "strategic+overconfident": ["The Mastermind Who Called It Early", "A strategic plan with one overconfident assumption: that the enemy had also read it."],
+    "strategic+chaotic": ["The Strategist with a Confetti Cannon", "A strategic opening, a chaotic middle, and an ending nobody can reconstruct. The plan may have been the confetti."],
+    "strategic+stubborn": ["The Architect of the One True Plan", "The strategic plan was good. The stubborn commitment to it after it stopped working was truly impressive."],
+    "strategic+greedy": ["The Treasure-Route Planner", "A strategic route through the level that happened to pass every single chest. Greedy, but beautifully organised."],
+    "strategic+energetic": ["The Tactician on Fast-Forward", "Strategic orders delivered at an energetic sprint: the plan was clear, if you could keep up with it."],
+    "strategic+lucky": ["The Accidental Mastermind", "It was either a strategic masterstroke or a lucky accident. This player is not taking questions."],
+    "strategic+cautious": ["The Architect of Plan B", "A strategic mind with a cautious heart: there was a plan, a backup plan, and a backup for the backup."],
+    "strategic+adventurous": ["The Cartographer of Bad Ideas", "An adventurous route that nobody had tried, backed by strategic reasoning that almost holds up."],
+    "strategic+quiet": ["The Chess Player in the Corner", "Barely spoke all round, then the whole map fell into place. A quiet player running a strategic game in the background."],
+    "strategic+talkative": ["The Commentator With a Plan", "A strategic briefing that never really ended. Talkative, yes, but every sentence had a waypoint in it."],
+    "strategic+sneaky": ["The Ambush Architect", "A strategic trap and a sneaky hiding spot: the other team walked in exactly where the diagram said they would."],
+    "strategic+competitive": ["The Scoreboard Scientist", "Competitive enough to care about every point and strategic enough to know where the next one was coming from."],
+    "funny+creative": ["The Sketch Show Engineer", "A creative solution that should not have worked, explained in a way so funny that nobody minded when it didn't."],
+    "funny+patient": ["The Calm Comedian", "Patient through every wipe and funny about each one. The fifth attempt came with a new punchline."],
+    "funny+adaptable": ["The Improv Performer", "The plan fell apart and this adaptable player turned it into a bit. Funny, and somehow still useful."],
+    "funny+encouraging": ["The Morale Department", "Funny when the team was losing and encouraging when it was really losing. Nobody logged off sad."],
+    "funny+clutch": ["The Comedian Who Lands the Punchline", "Spent the round being funny on the mic, then pulled off a clutch play mid-joke without missing a beat."],
+    "funny+reckless": ["The Stunt Comedian", "A reckless jump off the highest ledge, narrated on the way down. It did not work, but it was very funny."],
+    "funny+distracted": ["The Sidetracked Stand-Up", "Got distracted by a chicken, followed it for two minutes, and came back with a story funny enough to justify it."],
+    "funny+hesitant": ["The Nervous Narrator", "Hesitant at the door, but funny about it: the list of reasons not to go in deserved its own show."],
+    "funny+impatient": ["The Heckler of Loading Screens", "Too impatient for the cutscene and funny enough to replace it with better dialogue."],
+    "funny+overconfident": ["The Victory Speech Rehearsal", "The overconfident acceptance speech began before the fight did. The way it ended was funny for everyone else."],
+    "funny+chaotic": ["The Slapstick Specialist", "A chaotic round with perfect comic timing. It is unclear whether any of it was on purpose, but it was funny."],
+    "funny+stubborn": ["The Running Gag", "A stubborn refusal to stop trying the same trick, which got funny somewhere around the sixth attempt."],
+    "funny+greedy": ["The Apologetic Bandit", "Greedy with every chest and funny about it: each theft came with a small apology and a bow."],
+    "funny+energetic": ["The Hype Comedian", "An energetic stream of bits, voices and sound effects. Funny for the whole round, with no sign of running out."],
+    "funny+lucky": ["The Blooper Reel Winner", "A lucky bounce won the round in the silliest way possible, and this player was funny enough to take full credit."],
+    "funny+cautious": ["The Health-and-Safety Comedian", "Cautious about every doorway, and funny about it too: the risk assessment got a laugh from the whole squad."],
+    "funny+adventurous": ["The Tour Guide of Terrible Ideas", "An adventurous trip to somewhere the map never intended, with commentary funny enough to bring the team along."],
+    "funny+quiet": ["The One-Liner Sniper", "Quiet for ten minutes, then one perfectly timed line that was funny enough to stop the match."],
+    "funny+talkative": ["The All-Night Open Mic", "Talkative from the lobby to the final screen, and funny for most of it. The mute button stayed untouched."],
+    "funny+sneaky": ["The Prankster in the Bushes", "A sneaky ambush from inside a bush, and a funny little wave afterwards. The other team is still annoyed."],
+    "funny+competitive": ["The Friendly Rivalry Announcer", "Competitive enough to keep score out loud and funny enough that even the losing side was laughing."],
+    "creative+patient": ["The Slow-Motion Inventor", "A creative solution that needed nineteen careful steps, built by someone patient enough to do all of them."],
+    "creative+adaptable": ["The Rule-Bending Engineer", "Creative with the tools and adaptable with the rules: when the bridge was out, the bridge became optional."],
+    "creative+encouraging": ["The Art Teacher of the Squad", "Encouraging about everyone's ideas, including the creative one involving a barrel. Especially that one."],
+    "creative+clutch": ["The Trick-Shot Artist", "A creative angle nobody had tried, saved for the clutch moment when it absolutely had to work."],
+    "creative+reckless": ["The Mad Scientist", "A creative experiment with explosives, run by a reckless researcher standing much too close."],
+    "creative+distracted": ["The Daydreaming Designer", "Distracted from the objective, but for a creative reason: this player was building a staircase out of crates."],
+    "creative+hesitant": ["The Inventor Who Wouldn't Press Start", "A creative idea, fully designed, and a hesitant hand hovering over the button for most of the round."],
+    "creative+impatient": ["The Shortcut Inventor", "Too impatient for the intended route, and creative enough to find one through a wall."],
+    "creative+overconfident": ["The Unlicensed Architect", "A creative build that was declared indestructible by its overconfident designer, shortly before the first test."],
+    "creative+chaotic": ["The Abstract Expressionist", "A chaotic mess of ideas, at least one of them creative enough to win the round. Nobody is sure which."],
+    "creative+stubborn": ["The Artist Who Wouldn't Revise", "A creative plan that deserved a second draft, defended to the end by its stubborn author."],
+    "creative+greedy": ["The Treasure Hunter With Blueprints", "Greedy for the chest on the unreachable ledge, and creative enough to reach it with two boxes and a prayer."],
+    "creative+energetic": ["The Idea Fountain", "An energetic burst of creative plans, roughly one every ten seconds. The team got to pick a favourite."],
+    "creative+lucky": ["The Happy Accident Artist", "A creative idea that worked for reasons unrelated to the idea. Lucky, but the painting still counts."],
+    "creative+cautious": ["The Careful Tinkerer", "Creative with the solution and cautious with the testing: it was tried on a crate first, then on the boss."],
+    "creative+adventurous": ["The Explorer With a Sketchbook", "Adventurous enough to leave the map and creative enough to find a use for whatever was out there."],
+    "creative+quiet": ["The Workshop in the Corner", "A quiet player off to one side, building something creative that nobody understood until it won the round."],
+    "creative+talkative": ["The Brainstorm That Never Ends", "A talkative stream of creative ideas, pitched live. Some were brilliant, and all of them were out loud."],
+    "creative+sneaky": ["The Trapdoor Designer", "A sneaky route that nobody else knew existed, opened by a creative use of a door that was not a door."],
+    "creative+competitive": ["The Inventor of New Ways to Win", "Competitive enough to need the win and creative enough to find a rule that technically allowed it."],
+    "patient+adaptable": ["The Zen Navigator", "Patient when the plan stalled and adaptable when it changed. This player simply waited, then walked a different way."],
+    "patient+encouraging": ["The World's Kindest Tutorial", "Patient through every failed jump and encouraging after each one. The seventh attempt got a round of applause."],
+    "patient+clutch": ["The Sniper Who Waited", "Patient for the entire round, then clutch for exactly one second. That second was the only one that mattered."],
+    "patient+reckless": ["The Calm Before the Cannonball", "Patient for nine minutes, reckless for one. The nine minutes were the setup, and the one was spectacular."],
+    "patient+distracted": ["The Unhurried Wanderer", "Distracted by every side path and patient enough to explore each one fully. The objective was in no rush either."],
+    "patient+hesitant": ["The Professional Waiter", "It is hard to tell where patient ended and hesitant began, but the doorway was guarded very thoroughly."],
+    "patient+impatient": ["The Zen Master of Fast Forward", "Patient with teammates and impatient with loading screens: endless calm for people, none at all for progress bars."],
+    "patient+overconfident": ["The Slow and Certain Champion", "An overconfident prediction, followed by a patient wait for it to come true. It is still being waited on."],
+    "patient+chaotic": ["The Eye of the Storm", "A chaotic round on every side, and one patient player standing in the middle of it, waiting for a gap."],
+    "patient+stubborn": ["The Glacier", "Patient enough to wait and stubborn enough to never move. The other team gave up on that corner eventually."],
+    "patient+greedy": ["The Chest Camper", "Patient enough to wait for the rare drop and greedy enough to wait for a second one."],
+    "patient+energetic": ["The Coiled Spring", "Energetic in every movement but patient about when to use it: the sprint was saved for exactly the right door."],
+    "patient+lucky": ["The Fisherman's Reward", "Patient enough to wait for the perfect moment, and lucky that the perfect moment walked right past."],
+    "patient+cautious": ["The Bomb Disposal Expert", "Patient and cautious to a professional standard: every trap was found, studied and politely walked around."],
+    "patient+adventurous": ["The Long-Distance Hiker", "An adventurous route across the entire map, walked by someone patient enough to enjoy every step of it."],
+    "patient+quiet": ["The Statue in the Tall Grass", "Quiet and patient for so long that the other team forgot this player existed. That was the plan."],
+    "patient+talkative": ["The Podcast in the Waiting Room", "Patient through the longest queue of the night, and talkative enough to make it feel like a show."],
+    "patient+sneaky": ["The Ambush That Took All Day", "A sneaky spot behind the crates and a patient wait inside it. The trap worked, about ten minutes later."],
+    "patient+competitive": ["The Marathon Runner", "Competitive about the result and patient about getting there: the lead came late, and it stayed."],
+    "adaptable+encouraging": ["The Captain of Plan C", "Adaptable when the plan broke and encouraging about the new one: \"this is fine, we go left now\" has never sounded so convincing."],
+    "adaptable+clutch": ["The Improviser at the Buzzer", "The plan was gone, so this adaptable player made a new one in two seconds. The clutch finish was pure improvisation."],
+    "adaptable+reckless": ["The Stunt Pilot", "A reckless dive into the wrong room, rescued by an adaptable mind that decided it was the right room after all."],
+    "adaptable+distracted": ["The Detour Diplomat", "Distracted by a side quest, then adaptable enough to convince the team the side quest was the mission."],
+    "adaptable+hesitant": ["The Late Bloomer", "Hesitant at the start, adaptable by the end: it took a while to commit, but every change after that was handled."],
+    "adaptable+impatient": ["The Plan-Skipper", "Too impatient to hear the whole plan, and adaptable enough that it did not matter."],
+    "adaptable+overconfident": ["The Bluffer With a Parachute", "An overconfident charge that should have ended badly, saved by an adaptable retreat that looked almost intentional."],
+    "adaptable+chaotic": ["The Surfer of Disasters", "A chaotic round that this adaptable player rode like a wave. Nothing went to plan, and it barely mattered."],
+    "adaptable+stubborn": ["The Flexible Mule", "Stubborn about the goal and adaptable about everything else: the destination never changed, only the six routes to it."],
+    "adaptable+greedy": ["The Opportunist", "Greedy for whatever dropped and adaptable enough to use it: this player changed class twice to match the loot."],
+    "adaptable+energetic": ["The Human Pinball", "Energetic in every direction and adaptable at every bounce. Wherever the fight moved, this player was already there."],
+    "adaptable+lucky": ["The Cat With a Compass", "Adaptable enough to land on both feet, and lucky that there was ground there."],
+    "adaptable+cautious": ["The Weather Forecaster", "Cautious enough to expect trouble and adaptable enough to have packed for it."],
+    "adaptable+adventurous": ["The Off-Road Specialist", "Adventurous enough to leave the path and adaptable enough to cope with what was living out there."],
+    "adaptable+quiet": ["The Chameleon", "A quiet player who filled whichever role was empty. Adaptable to the point that nobody noticed the swap."],
+    "adaptable+talkative": ["The Live Traffic Report", "Talkative for a useful reason: this adaptable player announced every change of plan as it happened."],
+    "adaptable+sneaky": ["The Shape-Shifter", "A sneaky approach that changed three times on the way in. Adaptable enough that even the guards lost track."],
+    "adaptable+competitive": ["The Meta Chaser", "Competitive enough to want every edge and adaptable enough to switch tactics the moment one stopped working."],
+    "encouraging+clutch": ["The Cheerleader Who Scores", "Encouraging on the mic all round, then a clutch finish to back up every word of it."],
+    "encouraging+reckless": ["The Enthusiastic Bad Influence", "An encouraging voice behind every reckless idea: \"you can make that jump\" was said four times, and was wrong four times."],
+    "encouraging+distracted": ["The Cheerful Absentee", "Encouraging from somewhere far off the map. Distracted by a side quest, but the team could still hear the applause."],
+    "encouraging+hesitant": ["The Coach Behind the Curtain", "Hesitant to go first, but encouraging to whoever did. \"You've got this\" was shouted from a very safe distance."],
+    "encouraging+impatient": ["The Coach With a Stopwatch", "Encouraging and impatient at once: \"you're doing great, now please do it faster.\""],
+    "encouraging+overconfident": ["The Hype Machine", "Encouraging to the team and overconfident about the outcome: everyone was told the boss would be easy. It was not."],
+    "encouraging+chaotic": ["The Party Cannon", "A chaotic round with an encouraging soundtrack. Nothing went right, and the cheering never stopped."],
+    "encouraging+stubborn": ["The Believer", "Stubborn about one thing only: this team can win. Encouraging through eleven attempts in a row."],
+    "encouraging+greedy": ["The Friendly Tax Collector", "Encouraging the team to open every chest, and greedy enough to be standing next to each one when it opened."],
+    "encouraging+energetic": ["The Mascot", "An energetic lap around the whole squad, with an encouraging word for each. Nobody asked, and everyone felt better."],
+    "encouraging+lucky": ["The Good-Luck Charm", "Encouraging words before the roll and a lucky result after it. The team has decided the two are connected."],
+    "encouraging+cautious": ["The Swimming Instructor", "Cautious about the deep end and encouraging about the shallow one: small steps, loud applause."],
+    "encouraging+adventurous": ["The Expedition Leader", "An adventurous route into the unknown, with an encouraging voice at the front promising it was a shortcut."],
+    "encouraging+quiet": ["The Thumbs-Up in the Corner", "A quiet player who only spoke to say \"nice one\". Encouraging, in exactly as many words as needed."],
+    "encouraging+talkative": ["The Motivational Podcast", "Talkative from start to finish and encouraging in every sentence. The pep talk lasted longer than the match."],
+    "encouraging+sneaky": ["The Whispering Coach", "A sneaky flank with an encouraging whisper on the way past: \"keep them busy, you're doing great.\""],
+    "encouraging+competitive": ["The Captain of the Winning Mood", "Competitive about the score and encouraging about the team: this player wants to win, and wants you there for it."],
+    "clutch+reckless": ["The Daredevil Who Lands It", "A reckless plan that had no right to work, finished with a clutch landing that made it look sensible."],
+    "clutch+distracted": ["The Hero Who Arrived Late", "Distracted for most of the round, then back just in time for the clutch play. An entrance, at least."],
+    "clutch+hesitant": ["The Reluctant Hero", "Hesitant right up to the final second, and clutch in it. The pause, it turns out, was dramatic timing."],
+    "clutch+impatient": ["The Buzzer Beater in a Hurry", "Too impatient to wait for the team, which is how the clutch play ended up being a solo."],
+    "clutch+overconfident": ["The Called Shot", "An overconfident promise before the round and a clutch play at the end of it. For once, the two matched."],
+    "clutch+chaotic": ["The Miracle Worker", "A chaotic round that should have been lost four times, rescued by one clutch play nobody can explain."],
+    "clutch+stubborn": ["The Last One Standing", "Too stubborn to go down with the rest of the squad, and clutch enough to make that the winning decision."],
+    "clutch+greedy": ["The Jackpot Finisher", "Greedy enough to go back for one more chest, and clutch enough to escape with it while the room collapsed."],
+    "clutch+energetic": ["The Final-Minute Firework", "Energetic all round and somehow more so at the end, when the clutch play arrived at a full sprint."],
+    "clutch+lucky": ["The Coin That Landed on Its Edge", "The team is split on whether that was a clutch play or a lucky one. This player is firmly on one side."],
+    "clutch+cautious": ["The Safe Pair of Hands", "Cautious for nine minutes so that the tenth could be clutch. Nothing was risked until it had to be."],
+    "clutch+adventurous": ["The Cliffhanger", "An adventurous route that put the whole round in doubt, resolved by a clutch finish at the very last ledge."],
+    "clutch+quiet": ["The No-Comment Closer", "A quiet player all match, with nothing to say before the clutch play and nothing to add after it."],
+    "clutch+talkative": ["The Play Called Out Loud", "Talkative enough to announce the play in advance and clutch enough to deliver it exactly as described."],
+    "clutch+sneaky": ["The Vanishing Act", "A sneaky route nobody was watching, and a clutch capture at the end of it. The other team found out from the scoreboard."],
+    "clutch+competitive": ["The Big-Game Player", "Competitive from the first second, and clutch in the last one. This is the round this player showed up for."],
+    "reckless+distracted": ["The Runaway Shopping Trolley", "A reckless sprint in one direction, then a distracted swerve in another. The objective was in neither."],
+    "reckless+hesitant": ["The All-or-Nothing Switch", "Hesitant for a full minute, then reckless for three seconds. There was no setting in between."],
+    "reckless+impatient": ["The Human Skip Button", "Too impatient to wait for the plan and too reckless to need one. The door never stood a chance."],
+    "reckless+overconfident": ["The Charge Before the Plan", "An overconfident countdown, a reckless charge, and a very short fight. The speech beforehand was excellent."],
+    "reckless+chaotic": ["The Wrecking Ball", "A reckless entrance into a chaotic fight, which it made noticeably worse. Enjoyably worse."],
+    "reckless+stubborn": ["The Battering Ram", "A reckless charge at the front gate, repeated by a stubborn attacker until either the gate or the plan gave way."],
+    "reckless+greedy": ["The Treasure Diver", "Greedy for the chest in the lava room and reckless enough to go and get it. The chest is fine."],
+    "reckless+energetic": ["The Loose Firework", "An energetic launch in a reckless direction. Nobody could steer it, so the team just watched."],
+    "reckless+lucky": ["The Stunt Double With Nine Lives", "A reckless leap into the unknown, followed by a lucky landing nobody can explain."],
+    "reckless+cautious": ["The Bungee Jumper With Two Ropes", "Cautious right up until the moment it mattered, then gloriously reckless. The team is still deciding which one helped."],
+    "reckless+adventurous": ["The Explorer Without a Map", "An adventurous path into the unknown, taken at a reckless speed. Several new areas were discovered, briefly."],
+    "reckless+quiet": ["The Unannounced Cannonball", "A quiet player who said nothing at all before the reckless jump. The team found out from the splash."],
+    "reckless+talkative": ["The Narrated Disaster", "A reckless plan, announced in full by a talkative pilot on the way in. The team had time to object and didn't."],
+    "reckless+sneaky": ["The Loud Ninja", "A sneaky approach for the first half and a reckless one for the second. The guards noticed the second half."],
+    "reckless+competitive": ["The All-In Gambler", "Competitive enough to want the win right now, and reckless enough to bet the whole round on one push."],
+    "distracted+hesitant": ["The Tourist at the Crossroads", "Hesitant about which way to go, then distracted by a third option that was not on the list."],
+    "distracted+impatient": ["The Channel Surfer", "Too impatient to finish one objective and too distracted to start the next. Six things are now half done."],
+    "distracted+overconfident": ["The Multitasker", "An overconfident claim to be handling everything at once, made by a distracted player handling none of it."],
+    "distracted+chaotic": ["The Butterfly Effect", "A distracted wander in the wrong direction set off a chaotic chain of events that nobody has fully traced."],
+    "distracted+stubborn": ["The Side Quest Loyalist", "Distracted by a side quest, and far too stubborn to leave it unfinished while the main fight carried on."],
+    "distracted+greedy": ["The Magpie", "Greedy for anything that glittered and distracted by all of it. The objective did not glitter."],
+    "distracted+energetic": ["The Puppy Off the Lead", "An energetic sprint in the right direction, then a distracted one in four others."],
+    "distracted+lucky": ["The Sleepwalking Winner", "Distracted for the whole fight, and lucky enough to wander through it untouched and collect the flag."],
+    "distracted+cautious": ["The Inspector of Irrelevant Corners", "Cautious enough to check every corner, and distracted enough to check ones in a different building."],
+    "distracted+adventurous": ["The Wanderer", "Distracted by a path and adventurous enough to follow it to the end. The team has been sent a postcard."],
+    "distracted+quiet": ["The Empty Chair", "A quiet player, possibly distracted, possibly making a sandwich. The character stood very still for a while."],
+    "distracted+talkative": ["The Storyteller Who Missed the Fight", "Talkative about something unrelated and distracted by telling it. The boss was beaten somewhere around chapter two."],
+    "distracted+sneaky": ["The Burglar Who Stopped for Snacks", "A sneaky route around the guards, paused halfway by a distracted look inside a barrel."],
+    "distracted+competitive": ["The Rival of the Wrong Thing", "Competitive about a minigame nobody else was playing, and too distracted by it to notice the actual score."],
+    "hesitant+impatient": ["The Engine Revving in Neutral", "Impatient to get going and hesitant to actually go: a lot of pacing happened in front of that door."],
+    "hesitant+overconfident": ["The Brave Speech, Then the Pause", "Overconfident in the lobby and hesitant at the boss door. The speech and the footsteps did not match."],
+    "hesitant+chaotic": ["The Deer in the Fireworks", "A chaotic fight broke out, and one hesitant player stood in the middle of it deciding what to do first."],
+    "hesitant+stubborn": ["The Doorway Negotiator", "Hesitant to go in, and stubborn about not being rushed. The door and this player reached an understanding eventually."],
+    "hesitant+greedy": ["The Chest Inspector", "Greedy for the loot and hesitant about the trap: the chest was circled four times before it was opened."],
+    "hesitant+energetic": ["The Jogger at the Red Light", "Energetic on the spot and hesitant to leave it. A great deal of running happened without much distance."],
+    "hesitant+lucky": ["The Late Arrival Who Missed the Trap", "Hesitant for just long enough that the trap went off without anyone in it. Lucky, and never to be admitted."],
+    "hesitant+cautious": ["The Double-Checker", "Cautious about the room and hesitant about the door to it. Both were inspected thoroughly, from outside."],
+    "hesitant+adventurous": ["The Diver on the High Board", "Adventurous enough to climb all the way up there, and hesitant enough to stand at the edge for a while."],
+    "hesitant+quiet": ["The Shadow by the Entrance", "A quiet figure near the doorway, hesitant to step through it. Nobody hurried things along, and that was appreciated."],
+    "hesitant+talkative": ["The Debate Club of One", "Hesitant to choose a route and talkative about why: the team heard the full case for both."],
+    "hesitant+sneaky": ["The Heist Rehearsal", "A sneaky plan, ready to go, and a hesitant pause behind the crate while it was rehearsed one more time."],
+    "hesitant+competitive": ["The Athlete at the Starting Block", "Competitive enough to badly want the win and hesitant about the first move that might lose it."],
+    "impatient+overconfident": ["The Early Celebration", "Too impatient to wait for backup and overconfident enough not to need it. Backup arrived for the respawn."],
+    "impatient+chaotic": ["The Fast-Forward Button", "Too impatient for the countdown, which is how the chaotic part started eleven seconds early."],
+    "impatient+stubborn": ["The Door Knocker", "Impatient with the locked door and stubborn about it: the same button was pressed forty times, faster each time."],
+    "impatient+greedy": ["The Smash-and-Grab", "Greedy for the loot and too impatient to wait for the room to be cleared first."],
+    "impatient+energetic": ["The Head Start", "Energetic and impatient in the same body: already at the objective while the briefing was still on slide one."],
+    "impatient+lucky": ["The Queue-Jumping Jackpot", "Too impatient to wait for a good opportunity, and lucky enough that one turned up anyway."],
+    "impatient+cautious": ["The Hurry-Up-and-Wait Specialist", "Impatient to get going, cautious about actually going. No doorway has ever been examined so quickly."],
+    "impatient+adventurous": ["The Shortcut Seeker", "Too impatient for the main road and adventurous enough to try the cliff instead. It was faster, technically."],
+    "impatient+quiet": ["The Tapping Foot", "A quiet player who never complained out loud. The impatient sprint ahead of the group said enough."],
+    "impatient+talkative": ["The Countdown Commentator", "Impatient and talkative together: \"are we going, are we going now, how about now\" was most of the briefing."],
+    "impatient+sneaky": ["The Ninja Who Ran", "A sneaky plan that needed a slow approach, carried out by someone too impatient to walk."],
+    "impatient+competitive": ["The Rematch Button", "Competitive about the result and impatient for the next one: the rematch was requested before the scores appeared."],
+    "overconfident+chaotic": ["The Ringmaster", "An overconfident promise that everything was under control, made from the centre of a very chaotic room."],
+    "overconfident+stubborn": ["The Unsinkable Captain", "Overconfident about the plan and stubborn when it started sinking. The ship went down mid-reassurance."],
+    "overconfident+greedy": ["The High Roller", "Greedy for the biggest chest and overconfident about the guardian sitting on it. One of those was a miscalculation."],
+    "overconfident+energetic": ["The Pre-Match Victory Lap", "An energetic victory lap, run slightly before the match. Overconfident, but the form was good."],
+    "overconfident+lucky": ["The Prophet Who Got Away With It", "An overconfident prediction that had no business coming true, rescued by a lucky bounce. It will now be repeated."],
+    "overconfident+cautious": ["The Helmet and the Speech", "Cautious in every action and overconfident in every sentence: the boasting was done from behind solid cover."],
+    "overconfident+adventurous": ["The Fearless Tour Guide", "An adventurous route, led by an overconfident guide who had never been there and said so only afterwards."],
+    "overconfident+quiet": ["The Smirk", "A quiet player who said almost nothing. The overconfident walk into the boss room said the rest."],
+    "overconfident+talkative": ["The Pre-Game Press Conference", "Talkative before the round and overconfident in every answer. The post-game conference was shorter."],
+    "overconfident+sneaky": ["The Spy Who Waved", "A sneaky entrance, spoiled slightly by the overconfident wave at the guards on the way past."],
+    "overconfident+competitive": ["The Trophy Shelf Planner", "Competitive about the title and overconfident enough to be clearing a shelf for it at half-time."],
+    "chaotic+stubborn": ["The Committed Tornado", "A chaotic approach that clearly was not working, repeated by a stubborn player until it somehow did."],
+    "chaotic+greedy": ["The Loot Tornado", "A greedy dash for every chest at once, which turned a tidy room into a chaotic one in about four seconds."],
+    "chaotic+energetic": ["The Popcorn Machine", "Energetic and chaotic in every direction at once. The enemy could not predict it, and neither could the team."],
+    "chaotic+lucky": ["The Domino Champion", "A chaotic chain of accidents that ended in a win. Lucky is one word for it, and the only one available."],
+    "chaotic+cautious": ["The Careful Hurricane", "Cautious in theory and chaotic in practice: the trap was checked very carefully, then set off anyway."],
+    "chaotic+adventurous": ["The Expedition That Got Out of Hand", "An adventurous idea that became a chaotic one about a minute in. Nobody regrets it, exactly."],
+    "chaotic+quiet": ["The Unexplained Avalanche", "A quiet player at the centre of a chaotic round, offering no explanation for any of it."],
+    "chaotic+talkative": ["The Radio Play", "A chaotic fight with a talkative narrator in the middle, describing a different fight entirely."],
+    "chaotic+sneaky": ["The Smoke Bomb", "A sneaky plan that turned chaotic the moment it began. Nobody saw this player, mostly because nobody could see anything."],
+    "chaotic+competitive": ["The Wildcard Contender", "Competitive about winning and chaotic about how. The scoreboard was climbed by a route nobody else would try."],
+    "stubborn+greedy": ["The Dragon on the Hoard", "Greedy enough to claim the whole pile and stubborn enough to stand on it for the rest of the round."],
+    "stubborn+energetic": ["The Wind-Up Toy", "Energetic and stubborn in a straight line: straight into the wall, bounce, and straight into it again."],
+    "stubborn+lucky": ["The Broken Clock", "A stubborn refusal to change tactics, finally rewarded on the ninth try by a lucky break."],
+    "stubborn+cautious": ["The Fortress", "Cautious about leaving cover and stubborn about staying in it. The other team ran out of ideas first."],
+    "stubborn+adventurous": ["The Explorer Who Refused the Map", "An adventurous route that was plainly a dead end, followed all the way by a stubborn traveller to make sure."],
+    "stubborn+quiet": ["The Unmoved Mountain", "A quiet player who did not argue with the plan. The stubborn decision to do something else was made in silence."],
+    "stubborn+talkative": ["The Closing Argument", "Stubborn about the route and talkative in its defence: the debate outlasted the round it was about."],
+    "stubborn+sneaky": ["The Persistent Burglar", "A sneaky route that kept getting spotted, tried again and again by a stubborn player until the guards got bored."],
+    "stubborn+competitive": ["The Best-of-Nine Negotiator", "Competitive enough to hate losing and stubborn enough to keep asking for one more round until it stopped being a loss."],
+    "greedy+energetic": ["The Vacuum Cleaner", "An energetic sweep of the whole level, with a greedy stop at everything that could be picked up."],
+    "greedy+lucky": ["The Jackpot Collector", "Greedy enough to open the cursed chest and lucky enough that the curse was on holiday."],
+    "greedy+cautious": ["The Appraiser", "Greedy for the treasure and cautious about the lid: it was opened eventually, with a very long stick."],
+    "greedy+adventurous": ["The Treasure Map Enthusiast", "Adventurous enough to cross the whole map for one rumour of loot, and greedy enough to check it was true."],
+    "greedy+quiet": ["The Disappearing Loot Trick", "A quiet player who never mentioned the chest. A greedy backpack mentioned it later."],
+    "greedy+talkative": ["The Auctioneer", "Greedy with the loot and talkative about why it was fair: the explanation took longer than the looting."],
+    "greedy+sneaky": ["The Pickpocket", "A sneaky hand in the loot pile while everyone was fighting. Greedy, and nearly impossible to prove."],
+    "greedy+competitive": ["The Collector of Everything", "Competitive about the score and greedy about the loot: both lists had the same name at the top."],
+    "energetic+lucky": ["The Bouncing Ball", "Energetic enough to try everything at once, and lucky enough that one of those things was the right one."],
+    "energetic+cautious": ["The Careful Sprinter", "Energetic between the doors and cautious at each one: sprint, stop, peek, sprint again."],
+    "energetic+adventurous": ["The Explorer With Too Much Coffee", "An adventurous lap of the entire map, done by someone energetic enough to suggest a second one."],
+    "energetic+quiet": ["The Whirlwind on Mute", "A quiet player who never announced a thing. The energetic trail of finished objectives did that."],
+    "energetic+talkative": ["The Morning Radio Host", "Energetic and talkative from the first second. The team was fully briefed, on everything, at speed."],
+    "energetic+sneaky": ["The Hummingbird", "Sneaky and energetic at once, which should not be possible: three flanks before the guards finished turning around."],
+    "energetic+competitive": ["The Warm-Up Champion", "Competitive from the warm-up and energetic to the final whistle. Every round got treated like a final."],
+    "lucky+cautious": ["The Insured Gambler", "Cautious enough to check every trap and lucky enough that the one they missed was broken."],
+    "lucky+adventurous": ["The Accidental Expedition Leader", "An adventurous wrong turn that ended at the treasure room. Lucky, and now officially the plan."],
+    "lucky+quiet": ["The Jackpot Nobody Heard About", "A quiet player who said nothing about the lucky drop. The glowing sword gave it away."],
+    "lucky+talkative": ["The Winner's Interview", "A lucky shot, followed by a talkative explanation of exactly how it was planned."],
+    "lucky+sneaky": ["The Ghost Who Found the Back Door", "A sneaky route that should have been guarded, and a lucky moment when the guard was looking the other way."],
+    "lucky+competitive": ["The Champion of Coin Flips", "Competitive enough to count every win, including the lucky ones. Especially those."],
+    "cautious+adventurous": ["The Explorer With a Packed Lunch", "Adventurous enough to leave the path and cautious enough to tie a rope to it first."],
+    "cautious+quiet": ["The Mouse in the Corridor", "Quiet footsteps and a cautious look around every corner. Nothing was triggered, and nothing was said."],
+    "cautious+talkative": ["The Safety Briefing", "Cautious about every room and talkative about every risk: the team has now heard the full list."],
+    "cautious+sneaky": ["The Professional Burglar", "Sneaky and cautious to a professional standard: no alarms, no footprints, and the door closed behind them."],
+    "cautious+competitive": ["The Defensive Champion", "Competitive enough to want the lead and cautious enough to sit on it for the rest of the round."],
+    "adventurous+quiet": ["The Lone Hiker", "A quiet player who wandered off on an adventurous route and came back with half the map uncovered."],
+    "adventurous+talkative": ["The Travel Vlogger", "An adventurous trip to the far corner of the map, described by a talkative guide for the whole journey."],
+    "adventurous+sneaky": ["The Secret Passage Finder", "Adventurous enough to try the suspicious wall and sneaky enough to use what was behind it."],
+    "adventurous+competitive": ["The Record-Seeking Explorer", "Competitive about being first and adventurous about how: the route was new, and so was the record."],
+    "quiet+talkative": ["The Radio With Two Settings", "Quiet for the first half and talkative for the second, with no warning in between. The team enjoyed both."],
+    "quiet+sneaky": ["The Rumour", "Quiet on the mic and sneaky on the map. The team is fairly sure this player was in the round."],
+    "quiet+competitive": ["The Poker Face", "A quiet player who never mentioned the score, and a competitive one who knew it to the point."],
+    "talkative+sneaky": ["The Whispering Ninja", "A sneaky flank with a talkative ninja on it: the whole route was whispered to the team, step by step."],
+    "talkative+competitive": ["The Sports Commentator", "Competitive about every point and talkative about each one: the score was read out, with analysis."],
+    "sneaky+competitive": ["The Trophy Thief", "Competitive enough to want the win and sneaky enough to take it while nobody was looking at the flag."]
+  }
+}

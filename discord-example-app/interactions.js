@@ -6,7 +6,7 @@ const privateReply = content => ({ type: 4, data: { content, flags: 64, allowed_
 const update = content => ({ type: 7, data: { content, embeds: [], components: [], allowed_mentions: { parse: [] } } });
 const announcements = {
   leave: 'is signing off for now!', decline: 'is sitting this one out!',
-  cancel: 'has a change of plans!', blame: 'has an explanation!', delay: 'needs a little more time!',
+  cancel: 'has a change of plans!', defence: 'has an explanation!', delay: 'needs a little more time!',
 };
 
 // Only private drafts live in memory. Restarts invalidate drafts, never the panel.

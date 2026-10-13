@@ -89,7 +89,7 @@ test('a portrait with words invites only the selected player to reply; a blank p
   const card = await h.play([[A, 'supportive'], [B, 'funny']]);
   assert.equal(card.content, `<@${A}>, how does this sound? Quick replies close <t:160:R>.`);
   assert.deepEqual(card.allowed_mentions, { parse: [] });
-  assert.match(card.embeds[0].description, /supportive when/);
+  assert.match(card.embeds[0].description, /supportive/i);
   assert.equal(buttons({ data: card }).length, 1);
   assert.match(card.components[0].components[0].custom_id, new RegExp(`^mermer:portrait:reply:[a-f0-9]{20}:${A}:positive:160000$`));
   const before = h.calls.length;

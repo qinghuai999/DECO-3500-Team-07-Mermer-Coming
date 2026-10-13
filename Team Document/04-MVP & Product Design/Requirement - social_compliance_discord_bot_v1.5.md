@@ -1,7 +1,7 @@
 # Social Compliance Gaming Discord Bot — Pally
-## Product / Prototype Requirements Document V1.4
+## Product / Prototype Requirements Document V1.5
 
-> Document Status: Aligned with the deployed prototype; Evaluated Player Reply added  
+> Document Status: Aligned with the deployed prototype; Evaluated Player Reply and combination portraits added  
 > Core Context: Multiplayer Team Gaming + Discord Communication  
 > Core Theme: Social Compliance / Social Power in Team Gaming
 
@@ -12,9 +12,25 @@ The core ideas and feature designs were collaboratively developed and discussed 
 
 ---
 
+## What Changed in V1.5
+
+V1.5 changes how Feature 2 writes its result, following feedback that the portraits felt repetitive. It also removes a redundant private message when a round or draw starts.
+
+| Area | V1.4 | V1.5 |
+|---|---|---|
+| Vocabulary | 17 words | 24 words: eight positive, eight negative, eight neutral |
+| Word groups | Three groups of seven; four words appeared in two groups | Three groups of eight; every word appears in exactly one group, and every group mixes all three leanings |
+| Sentence | One fixed sentence frame with a phrase per word inserted | No frame. Every word and every pair of words has its own hand-written sentence |
+| Title | One title per word; the first word's title was used | One title per word and one per pair of words, 300 in total |
+| Three or more words | Phrases listed in one sentence | Told pair by pair, pairing praise with teasing first; a word without a partner gets its own closing line |
+| Excuse category name | Blame | Defence. The excuses and the “Not my fault” description are unchanged |
+| Starting Trait Picker or Random Pick | The player who clicked also received a private “is running” note next to the public message | A successful start sends nothing privately. A private note appears only when the click did not start anything |
+
+Sections 5.6, 7.5, 7.8, 7.9, 7.10 and 7.11 describe the new behaviour. Where the V1.4 table below mentions the vocabulary or the portrait text, V1.5 replaces it.
+
 ## What Changed in V1.4
 
-V1.4 makes two kinds of change.
+V1.4 made two kinds of change.
 
 **1. A new interaction.** Following tutor feedback, the player who is described in Feature 2 can now answer the group's portrait. The reply is written back onto the same result card. See Section 7.12.
 
@@ -325,6 +341,12 @@ A Trait Picker is already in progress.
 
 Random Pick follows the same principle.
 
+A click that does start a round or draw is confirmed by the public message alone. The player who clicked receives no separate private note, because the two would appear at the same moment and say the same thing. A private note is sent only when the click did not start anything:
+
+- the feature is already in progress, including when two players click at almost the same time;
+- the player is not in the game voice channel, or used the panel in another channel;
+- the start failed, for example because the Bot could not post in the channel.
+
 When the feature finishes, the active state is released so that a new round can be started. The reply step of Feature 2 (Section 7.12) happens **after** the active state is released, so a team never has to wait for a reply before starting the next round.
 
 If the Bot restarts in the middle of a round, it closes the interrupted public message with a short notice and releases the state.
@@ -334,6 +356,7 @@ If the Bot restarts in the middle of a round, it closes the interrupted public m
 - **FR0.10** Duplicate-trigger feedback shall be visible only to the user who clicked, so that their action is not exposed publicly.
 - **FR0.11** When a feature completes, is cancelled, or terminates because of an error, the system shall correctly release its Active state.
 - **FR0.12** The system shall prevent errors from leaving a feature permanently locked in an Active state, including after a Bot restart.
+- **FR0.15** A click that starts Feature 2 or Feature 3 shall be confirmed by the public message only; the triggering user shall receive a private message only when the click did not start the activity.
 
 ---
 
@@ -378,7 +401,7 @@ The private menu offers six categories, so the excuse matches what the player ac
 | 🚪 Leave | I wanna go | “@player is signing off for now!” |
 | ✋ Decline | Not this time | “@player is sitting this one out!” |
 | 📅 Cancel | Can't make it | “@player has a change of plans!” |
-| 👉 Blame | Not my fault | “@player has an explanation!” |
+| 👉 Defence | Not my fault | “@player has an explanation!” |
 | ⏰ Delay | Maybe later | “@player needs a little more time!” |
 | 🎲 Surprise Me | I'm feeling lucky | Uses the announcement of whichever category the drawn excuse belongs to |
 
@@ -531,10 +554,10 @@ Users may also choose nothing. There is no separate Skip action.
 
 The Bot does not publish the selected words as a separate list, frequency table, or vote result. Instead, it combines the valid words internally and produces two outputs:
 
-1. one humorous sentence that naturally connects and explicitly includes the selected words; and
+1. a short humorous text, one to a few sentences, that naturally connects and explicitly includes the selected words; and
 2. one concise, playful, non-targeted title that summarises the overall impression.
 
-The selected words therefore appear only as part of the generated sentence rather than as a standalone evaluation result.
+The selected words therefore appear only as part of the generated text rather than as a standalone evaluation result.
 
 After the result is published, the selected player may reply to it. The reply is added to the same card (Section 7.12).
 
@@ -660,17 +683,25 @@ No words, frequencies, counts, or individual choices are revealed at any step.
 
 ## 7.5 Controlled Vocabulary Requirements
 
-The vocabulary is predefined by the system and contains only words describing **gameplay behaviour or performance**. The current vocabulary has 17 words:
+The vocabulary is predefined by the system and contains only words describing **gameplay behaviour or performance**. The current vocabulary has 24 words:
 
 | Leaning | Words |
 |---|---|
-| Positive | supportive, strategic, funny, creative, patient, adaptable, encouraging |
-| Negative | reckless, distracted, hesitant, impatient, overconfident, chaotic |
-| Neutral | energetic, lucky, cautious, adventurous |
+| Positive | supportive, strategic, funny, creative, patient, adaptable, encouraging, clutch |
+| Negative | reckless, distracted, hesitant, impatient, overconfident, chaotic, stubborn, greedy |
+| Neutral | energetic, lucky, cautious, adventurous, quiet, talkative, sneaky, competitive |
 
-The “leaning” of a word is used only to choose suitable reply suggestions (Section 7.12). It is never shown to users.
+The “leaning” of a word is used to choose suitable reply suggestions (Section 7.12) and to decide which words are paired when a portrait has three or more (Section 7.9). It is never shown to users.
 
-The words are arranged in three groups of seven. Each participant sees one group at a time. Different participants start on different groups, so the team does not all see the same seven words first.
+The words are arranged in three groups of eight. Each participant sees one group at a time:
+
+| Group | Words shown |
+|---|---|
+| 1 | supportive, creative, stubborn, quiet, funny, impatient, patient, competitive |
+| 2 | strategic, reckless, lucky, clutch, distracted, energetic, greedy, talkative |
+| 3 | adaptable, hesitant, cautious, encouraging, overconfident, adventurous, chaotic, sneaky |
+
+Every word belongs to exactly one group, so no word is offered more often than another. Every group contains positive, negative and neutral words, so no group is “the critical one”. Different participants start on different groups, so the team does not all see the same eight words first.
 
 The vocabulary must not contain direct personal attacks such as:
 
@@ -752,7 +783,7 @@ Ping → Impatient
 Kiki → Overconfident
 ```
 
-However, the original selected evaluation words **must be naturally incorporated into the generated sentence**.
+However, the original selected evaluation words **must be naturally incorporated into the generated text**.
 
 For example, if the valid words are:
 
@@ -766,13 +797,12 @@ the public result is:
 
 ```text
 🎨 Group Reflection
-The Pocket-Sized Grandmaster
+The Three-Moves-Ahead Sprinter
 @Arthur
 
-In the team's eyes, this player is strategic with every tiny advantage,
-impatient with doors that open too slowly and overconfident before checking
-the health bar. Together, these traits turn an ordinary mission into a story
-worth retelling.
+Strategic enough to plan three moves ahead, too impatient to wait for the
+second one. Along the way came one overconfident victory speech, delivered
+slightly too early.
 
 Built from anonymous group input · Pally Together!
 ```
@@ -781,22 +811,47 @@ Therefore:
 
 - the original words are not separately displayed;
 - no vote counts or frequencies are shown; a word chosen by several people appears once;
-- the words always appear in the vocabulary's fixed order, so their position reveals nothing about who chose them or when;
+- the wording depends only on which words were chosen, never on who chose them, how many people chose the same word, or the order in which they were chosen;
 - no participant is linked to a specific word;
-- the selected words remain visible only within the generated humorous sentence;
-- the title is a broader, playful, non-targeted summary rather than a direct label based on one negative word;
+- the selected words remain visible only within the generated humorous text;
+- the text never contains a vocabulary word that nobody chose;
+- the title is a broader, playful, non-targeted summary and never contains a vocabulary word;
 - private selections are held only in memory for the length of the round and are never written to disk.
 
 ## 7.9 Portrait Generation Logic
 
-### Current Version: Templates
+### Current Version: Hand-Written Combinations
 
-The prototype builds the portrait from predefined text, without an external AI service:
+The prototype builds the portrait from a library of text written in advance, without an external AI service. There is no shared sentence frame: each entry is its own sentence, written around the meaning of its words.
 
-- every vocabulary word has one humorous phrase that contains the word, for example *lucky* → “lucky when the dice escape gravity”;
-- the phrases of the valid words are joined into one sentence;
-- every vocabulary word also has one playful title, for example *distracted* → “The Side Quest Magnet”; the title of the first valid word is used;
-- three word combinations have their own title: strategic + chaotic → “The Strategist with a Confetti Cannon”, patient + impatient → “The Zen Master of Fast Forward”, lucky + adventurous → “The Accidental Expedition Leader”.
+| Words in the portrait | What is shown | Entries in the library |
+|---|---|---|
+| One word | That word's own title and sentence | 24 |
+| Two words | That pair's own title and sentence, written about how the two fit together | 276, one for every possible pair |
+| Three or more words | The words are split into pairs; each pair contributes its sentence. A word left without a partner adds a closing line of its own. The title is that of the first pair | Built from the pair entries, plus two closing lines per word |
+
+A sentence for every possible set of three words would need 2,024 entries, and for four words 10,626. Writing each pair by hand and combining pairs keeps the library reviewable while still giving different combinations visibly different results.
+
+**How words are paired.** When there are three or more words, the Bot repeatedly takes the two remaining words whose leanings differ the most: a positive word with a negative one first, then a positive or negative word with a neutral one, then words of the same leaning. Contrast produces the most characterful sentences, for example a perfect plan that is abandoned in ten seconds. If several pairs are equally contrasting, the vocabulary's fixed order decides, so the same set of words always gives the same result.
+
+**Different combinations, different portraits.** Three words that overlap still read differently, because they fall into different pairs:
+
+| Words | Title | Sentence |
+|---|---|---|
+| strategic, reckless, lucky | The Grandmaster Who Flips the Board | Drew up a strategic masterpiece, then made the reckless decision to ignore it in the first ten seconds. And somehow lucky enough to walk away without a scratch. |
+| reckless, lucky, cautious | The Stunt Double With Nine Lives | A reckless leap into the unknown, followed by a lucky landing nobody can explain. Before any of it, a cautious check for traps came first. |
+| lucky, cautious, strategic | The Accidental Mastermind | It was either a strategic masterstroke or a lucky accident. This player is not taking questions. Credit where due: one cautious peek around the corner saved the day. |
+
+Examples of single words and pairs:
+
+| Words | Title | Sentence |
+|---|---|---|
+| distracted | The Side Quest Magnet | The objective was straight ahead. This distracted wanderer went left, to look at a particularly interesting rock. |
+| lucky | The Fortune Cookie Champion | The dice rolled, bounced off a wall and landed exactly where this lucky player needed them. |
+| strategic, chaotic | The Strategist with a Confetti Cannon | A strategic opening, a chaotic middle, and an ending nobody can reconstruct. The plan may have been the confetti. |
+| patient, impatient | The Zen Master of Fast Forward | Patient with teammates and impatient with loading screens: endless calm for people, none at all for progress bars. |
+
+The full library is kept in one data file in the Bot's source (`portrait-lines.json`) rather than in this document. Every entry is checked automatically: it must name exactly its own words, its title must not contain any vocabulary word, and no title or sentence may be used twice.
 
 The generator is not responsible for independently judging the player. Its role is:
 
@@ -821,7 +876,7 @@ impatient
 overconfident
 ```
 
-The system does not publish this list. It publishes the card shown in Section 7.8.
+The system does not publish this list. It pairs *strategic* with *impatient*, the first positive and negative words, uses that pair's title and sentence, and adds a closing line for *overconfident*. The result is the card shown in Section 7.8.
 
 ### Case B: All Evaluations Are Blank
 
@@ -841,14 +896,14 @@ Instead, it shows a fixed result that is neither positive nor negative and unrel
 
 ### Future AI Version
 
-AI generation of the sentence and title remains the planned next step for this feature. The requirements in Section 7.10 apply to the templates today and will apply unchanged to an AI generator.
+AI generation of the sentence and title remains a possible next step for this feature, for example to write a single sentence for four or more words. The requirements in Section 7.10 apply to the hand-written library today and will apply unchanged to an AI generator.
 
 ---
 
 ## 7.10 Portrait Text Requirements
 
 - **FR2.1** When valid keywords exist, the generator shall use the semantic meaning of the valid system-provided evaluation words.
-- **FR2.2** The generator shall produce one coherent and humorous sentence that naturally connects and explicitly includes the valid evaluation words.
+- **FR2.2** The generator shall produce a short, coherent and humorous text that naturally connects and explicitly includes the valid evaluation words.
 - **FR2.3** The generator shall additionally produce one concise, playful, and non-targeted title that summarises the combined evaluation.
 - **FR2.4** The title shall not simply repeat one potentially negative evaluation word as a direct label for the player.
 - **FR2.5** The generator shall not introduce unsupported negative judgments that participants did not express.
@@ -875,15 +930,21 @@ AI generation of the sentence and title remains the planned next step for this f
 - **FR2.23** After 30 seconds, the system shall automatically submit the currently highlighted word of every participant.
 - **FR2.24** A participant with no highlighted keyword shall automatically be recorded as a blank evaluation.
 - **FR2.25** Non-responsive users shall not block the overall evaluation process.
-- **FR2.26** The system shall not separately publish keyword lists, frequencies, vote counts, or individual selections; valid evaluation words may appear only as part of the generated sentence.
-- **FR2.27** When valid keywords exist, the system shall produce one humorous sentence explicitly incorporating the valid evaluation words and one concise, non-targeted playful title.
+- **FR2.26** The system shall not separately publish keyword lists, frequencies, vote counts, or individual selections; valid evaluation words may appear only as part of the generated text.
+- **FR2.27** When valid keywords exist, the system shall produce a short humorous text explicitly incorporating the valid evaluation words and one concise, non-targeted playful title.
 - **FR2.28** When all evaluations are blank, the system shall produce neutral and non-directional content.
-- **FR2.29** The final public output shall contain the generated sentence and title; the evaluation words shall not be displayed separately from that sentence.
+- **FR2.29** The final public output shall contain the generated text and title; the evaluation words shall not be displayed separately from that text.
 - **FR2.30** A participant shall be able to lock their word early with a Submit button; a submitted word cannot be changed.
 - **FR2.31** When every participant has submitted, the round shall end immediately.
 - **FR2.32** A player who joins the voice channel after a round started shall take part from the next round; a player who leaves shall lose their word for the current round.
 - **FR2.33** If the selected player leaves the voice channel during the round, the round shall be cancelled and no portrait shall be published.
 - **FR2.34** Fair-rotation history shall survive a Bot restart.
+- **FR2.51** The vocabulary shall contain 24 words: eight positive, eight negative and eight neutral.
+- **FR2.52** Each word shall be offered in exactly one group, and every group shall contain positive, negative and neutral words.
+- **FR2.53** Every single word and every pair of words shall have its own title and sentence written in advance; the system shall not build portraits from one shared sentence frame.
+- **FR2.54** A portrait of three or more words shall be told pair by pair, pairing the most contrasting words first; a word without a partner shall add a closing line of its own, and the title shall be that of the first pair.
+- **FR2.55** The portrait shall depend only on which words were chosen: the same set of words shall always produce the same title and text, whoever chose them and in whatever order.
+- **FR2.56** The portrait text shall name every chosen word and shall not contain any vocabulary word that was not chosen; a title shall not contain any vocabulary word.
 
 Requirements for the reply step are listed in Section 7.12.
 
@@ -1001,13 +1062,12 @@ Before a reply:
 @Arthur, how does this sound? Quick replies close in 60 seconds.
 
 🎨 Group Reflection
-The Red-Button Expedition Leader
+The Runaway Shopping Trolley
 @Arthur
 
-In the team's eyes, this player is reckless around mysterious red buttons,
-distracted by every shiny side quest and overconfident before checking the
-health bar. Together, these traits turn an ordinary mission into a story
-worth retelling.
+A reckless sprint in one direction, then a distracted swerve in another. The
+objective was in neither. The health bar disagreed with one overconfident
+prediction, but the delivery was flawless.
 
 Built from anonymous group input · Pally Together!
 
@@ -1018,13 +1078,12 @@ After the selected player replies:
 
 ```text
 🎨 Group Reflection
-The Red-Button Expedition Leader
+The Runaway Shopping Trolley
 @Arthur
 
-In the team's eyes, this player is reckless around mysterious red buttons,
-distracted by every shiny side quest and overconfident before checking the
-health bar. Together, these traits turn an ordinary mission into a story
-worth retelling.
+A reckless sprint in one direction, then a distracted swerve in another. The
+objective was in neither. The health bar disagreed with one overconfident
+prediction, but the delivery was flawless.
 
 💬 @Arthur’s reply
 > I blame the lag, the moon, and whoever was holding the snacks.
@@ -1344,9 +1403,9 @@ Within the 60 seconds, suggested lines can be reopened from the card. After that
 
 ### AI API Unavailable (future AI version)
 
-Fall back to the current templates:
+Fall back to the current hand-written library:
 
-- if valid keywords exist, use the predefined phrases and titles;
+- if valid keywords exist, use the titles and sentences written for those words;
 - if all evaluations are blank, use the fixed neutral result.
 
 ---
@@ -1400,7 +1459,7 @@ For Feature 2 in particular:
 
 ## 12.5 Safety
 
-All system-generated content must follow the non-offensive content principles. This covers the excuse library, the portrait phrases and titles, and the reply library.
+All system-generated content must follow the non-offensive content principles. This covers the excuse library, the portrait titles and sentences, and the reply library.
 
 ## 12.6 Consistency
 
@@ -1446,7 +1505,7 @@ Implemented:
 Click [Trait Picker]
 → Hide triggering user's identity
 → Fair random selection of the described player, remembered across restarts
-→ Controlled vocabulary of 17 words for all participants
+→ Controlled vocabulary of 24 words in three mixed groups for all participants
 → Maximum one word per participant
 → Other… to browse more words
 → Self-evaluation supported
@@ -1455,8 +1514,8 @@ Click [Trait Picker]
 → 30-second countdown; highlighted words are submitted on timeout
 → Private combination of valid keywords
 → No separate public list of evaluation words or vote counts
-→ Template sentence naturally incorporating the selected words
-→ Playful, non-targeted summary title
+→ Hand-written title and sentence for every word and every pair of words
+→ Three or more words told pair by pair, most contrasting first
 → Neutral result when all inputs are blank
 → Reply invitation for the described player
 → Three tone-matched suggestions, Another batch, 60-second limit
@@ -1534,7 +1593,9 @@ Key questions about expressing:
 - Is 30 seconds too long or too short?
 - Does allowing users to provide no input reduce participation pressure?
 - Does avoiding a separate display of raw keywords and vote counts make users more comfortable expressing themselves?
-- Does the generated sentence naturally connect the selected words while remaining humorous?
+- Does the generated text naturally connect the selected words while remaining humorous?
+- Do portraits feel written for this particular combination of words, or do they start to feel repetitive after several rounds?
+- When a portrait has three or more words, does it still read as one description?
 - Does the result introduce offensive or unsupported interpretations that were not present in the original input?
 - When everyone submits blank input, does the neutral result feel natural?
 - How anonymous does the input actually feel in a small group of friends?
@@ -1596,7 +1657,7 @@ The core logic of the three features can be summarised as:
 
 > **Feature 1:** The Bot does not decide whether a player should leave. It reduces the social cost of expressing “I want to leave”, “not this time” or “give me a moment”.
 
-> **Feature 2:** The Bot does not independently judge a player. Instead, all members, including the selected player, use the same controlled mechanism to express their perspectives. The selected words are not displayed separately; they are connected into a humorous sentence under a playful, non-targeted title. The selected player can then answer on the same card.
+> **Feature 2:** The Bot does not independently judge a player. Instead, all members, including the selected player, use the same controlled mechanism to express their perspectives. The selected words are not displayed separately; they are connected into a short humorous text under a playful, non-targeted title. The selected player can then answer on the same card.
 
 > **Feature 3:** The Bot does not decide what the group should do. It fairly redistributes the opportunity to decide.
 
@@ -1604,7 +1665,7 @@ The core logic of the three features can be summarised as:
 
 ## 17. Current Version: Confirmed Design Decisions
 
-The following product rules are confirmed in V1.4:
+The following product rules are confirmed in V1.5:
 
 1. The Bot is named Pally. Its features are Excuse Generator, Trait Picker and Random Pick.
 2. All three features are opened from one Control Panel, which any member can bring up with `/social` without being identified.
@@ -1618,8 +1679,8 @@ The following product rules are confirmed in V1.4:
 10. Feature 2 does not provide a Skip button; users may simply provide no input.
 11. Feature 2 uses a 30-second evaluation window with a Submit button. The round ends early when everyone has submitted; at 30 seconds, highlighted words are submitted automatically and everything else is blank.
 12. Feature 2 lets users browse more words with `Other…`, which does not extend the countdown.
-13. Feature 2 never displays selected words as a separate list, frequencies, vote counts, or participant-to-word mappings; selected words appear only inside the generated sentence.
-14. Feature 2 builds its sentence and title from predefined templates; AI generation is a later iteration and must follow the same text requirements.
+13. Feature 2 never displays selected words as a separate list, frequencies, vote counts, or participant-to-word mappings; selected words appear only inside the generated text.
+14. Feature 2 uses a vocabulary of 24 words. Every word and every pair of words has its own hand-written title and sentence, with no shared sentence frame; three or more words are told pair by pair, most contrasting first. AI generation is a later iteration and must follow the same text requirements.
 15. If all Feature 2 evaluations are blank, a fixed neutral result is shown with no positive or negative direction.
 16. The Feature 2 text must not introduce personal attacks or additional negative judgments that are not supported by the input.
 17. The player described in Feature 2 may reply to the portrait, and the reply is written onto the original result card.

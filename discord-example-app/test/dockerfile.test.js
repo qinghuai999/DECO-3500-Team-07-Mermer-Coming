@@ -16,7 +16,7 @@ test('the Docker image contains every local file the bot loads', () => {
     assert.ok(copied.has(file), `${file} is missing from the Dockerfile`);
     for (const [, target] of read(file).matchAll(/(?:from|import\()\s*['"]\.\/([\w.-]+)['"]/g)) pending.push(target);
     // Data files that exist in the repository; state files created at run time are not part of the image.
-    for (const [, data] of read(file).matchAll(/['"]([\w-]+\.json)['"]/g)) {
+    for (const [, data] of read(file).matchAll(/['"](?:\.\/)?([\w-]+\.json)['"]/g)) {
       if (existsSync(new URL(`../${data}`, import.meta.url))) assert.ok(copied.has(data), `${data} is missing from the Dockerfile`);
     }
   }

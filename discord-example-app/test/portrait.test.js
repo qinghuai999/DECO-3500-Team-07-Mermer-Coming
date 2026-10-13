@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createPortrait } from '../portrait.js';
 import { createPortraitStore } from '../portrait-store.js';
-import { portraitText, WORDS } from '../portrait-text.js';
+import { portraitText, portraitTone, WORDS, WORD_GROUPS } from '../portrait-text.js';
 import { createInteractions } from '../interactions.js';
 
 const guildId = '1542404404680982550', voiceChannelId = '1542404405301878860', textChannelId = '100000000000000001';
@@ -58,16 +58,59 @@ const submit = view => buttons(view).find(button => button.label === 'Submit').c
 const resultText = h => JSON.stringify(result(h)?.body);
 const result = h => h.calls.findLast(call => call.path.startsWith('channels/') && call.method === 'PATCH');
 
-test('all word pairs and the full vocabulary produce deterministic prose including every valid word', () => {
-  for (const words of [[], WORDS, ...WORDS.flatMap(a => WORDS.map(b => [a, b]))]) {
+// Whole-word matching: "patient" must not be found inside "impatient".
+const named = text => WORDS.filter(word => new RegExp(`\\b${word}\\b`, 'i').test(text));
+
+test('every word and every pair of words has its own title and sentence, naming exactly the chosen words', () => {
+  const combinations = [...WORDS.map(word => [word]), ...WORDS.flatMap((a, index) => WORDS.slice(index + 1).map(b => [a, b]))];
+  assert.equal(combinations.length, 24 + 276);
+  const titles = new Set(), sentences = new Set();
+  for (const words of combinations) {
     const output = portraitText(words);
-    assert.deepEqual(output, portraitText([...words].reverse().concat(words)));
-    assert.doesNotMatch(JSON.stringify(output), /\p{Script=Han}/u);
-    assert.ok(output.title && output.sentence && output.sentence.length < 1500);
-    for (const word of words) assert.ok(output.sentence.includes(word));
+    // Every chosen word appears, and no word that nobody chose is put in the team's mouth.
+    assert.deepEqual(named(output.sentence), words, output.sentence);
+    // A title is a playful summary, never one of the words used as a label.
+    assert.deepEqual(named(output.title), [], output.title);
+    assert.ok(output.title.length <= 45 && output.sentence.length <= 160, output.sentence);
+    assert.doesNotMatch(JSON.stringify(output), /\p{Script=Han}|[*_`<>@]/u);
+    titles.add(output.title);
+    sentences.add(output.sentence);
   }
+  assert.equal(titles.size, 300);
+  assert.equal(sentences.size, 300);
   assert.equal(portraitText(['lucky', 'adventurous']).title, 'The Accidental Expedition Leader');
+});
+
+test('three or more words are told pair by pair, contrast first, identically for any order or repetition', () => {
+  const abc = portraitText(['strategic', 'reckless', 'lucky']), bcd = portraitText(['reckless', 'lucky', 'cautious']);
+  const cda = portraitText(['lucky', 'cautious', 'strategic']);
+  assert.equal(new Set([abc.title, bcd.title, cda.title]).size, 3);
+  assert.equal(new Set([abc.sentence, bcd.sentence, cda.sentence]).size, 3);
+  // Praise is paired with teasing first; the word left over gets its own closing line.
+  const lead = portraitText(['strategic', 'reckless']);
+  assert.equal(abc.title, lead.title);
+  assert.ok(abc.sentence.startsWith(`${lead.sentence} `) && abc.sentence.length > lead.sentence.length + 20);
+  const four = portraitText(['supportive', 'funny', 'reckless', 'chaotic']);
+  assert.equal(four.sentence, `${portraitText(['supportive', 'reckless']).sentence} ${portraitText(['funny', 'chaotic']).sentence}`);
+  for (const [i, a] of WORDS.entries()) for (const [j, b] of WORDS.entries()) for (const [k, c] of WORDS.entries()) {
+    if (i >= j || j >= k) continue;
+    const output = portraitText([a, b, c]);
+    assert.deepEqual(named(output.sentence), [a, b, c], output.sentence);
+    assert.deepEqual(output, portraitText([c, a, b, a, c]));
+  }
+  const everything = portraitText(WORDS);
+  assert.deepEqual(named(everything.sentence), WORDS);
+  assert.ok(everything.sentence.length < 3000);
   assert.deepEqual(portraitText(['untrusted insult']), portraitText([]));
+  assert.match(portraitText([]).title, /Unwritten Legend/);
+});
+
+test('each word is offered in exactly one group of eight, and every group mixes all three tones', () => {
+  assert.deepEqual(WORD_GROUPS.flat().sort(), [...WORDS].sort());
+  for (const group of WORD_GROUPS) {
+    assert.equal(group.length, 8);
+    assert.deepEqual([...new Set(group.map(word => portraitTone([word])))].sort(), ['negative', 'neutral', 'positive']);
+  }
 });
 
 test('only bound voice members in the bound text channel may start; disconnects fail closed', () => {
@@ -86,10 +129,13 @@ test('anonymous start is acknowledged before publishing; simultaneous and replay
   const h = harness();
   const request = body();
   const start = h.portrait.handle(request);
-  assert.deepEqual(start.response, { type: 5, data: { flags: 64 } });
+  assert.deepEqual(start.response, { type: 6 }); // Silent: no private message accompanies a successful start.
   assert.equal(h.calls.length, 0);
-  assert.match(h.portrait.handle(body()).response.data.content, /already in progress/);
+  const second = h.portrait.handle(body()).response;
+  assert.match(second.data.content, /already in progress/);
+  assert.equal(second.data.flags, 64);
   await start.afterReply();
+  assert.equal(h.calls.length, 1);
   const publicMessage = h.calls[0];
   assert.equal(publicMessage.path, `channels/${textChannelId}/messages`);
   assert.match(publicMessage.body.content, new RegExp(A));
@@ -126,8 +172,8 @@ test('one highlighted draft can change; Submit locks it and prevents a second su
   assert.equal(result(h), undefined); // B has not submitted.
   assert.match(h.portrait.handle(body(select(view), A)).response.data.content, /Submitted/);
   await h.advance(30_000);
-  assert.match(resultText(h), /creative/);
-  assert.doesNotMatch(resultText(h), /supportive when/);
+  assert.match(resultText(h), /creative/i);
+  assert.doesNotMatch(resultText(h), /supportive/i);
   const expired = h.portrait.handle(body(select(view), A)).response;
   assert.equal(expired.type, 7);
   assert.deepEqual(expired.data.components, []);
@@ -145,8 +191,8 @@ test('timeout automatically submits the latest draft; Other changes options but 
   view = h.portrait.handle(body(select(view, 'reckless'), A)).response;
   assert.equal(result(h), undefined);
   await h.advance(10_000);
-  assert.match(resultText(h), /reckless/);
-  assert.doesNotMatch(resultText(h), /funny even/);
+  assert.match(resultText(h), /reckless/i);
+  assert.doesNotMatch(resultText(h), /funny/i);
   assert.ok(h.calls.some(call => call.path.startsWith('webhooks/') && /Submitted:.*reckless/i.test(call.body.content)));
 });
 
@@ -159,7 +205,7 @@ test('solo selection does not end the round; manual Submit finishes without wait
   latest = h.portrait.handle(body(select(latest, 'patient'), A)).response;
   assert.equal(result(h), undefined);
   await h.portrait.handle(body(submit(latest), A)).afterReply();
-  assert.match(resultText(h), /patient/);
+  assert.match(resultText(h), /patient/i);
   assert.equal(h.tasks.size, 1); // Only the 60-second reply window remains.
   assert.equal(h.state().active, null);
   const cleaned = h.calls.filter(call => call.path.startsWith('webhooks/') && /Submitted/.test(call.body.content));
@@ -178,8 +224,8 @@ test('players get different button sets; everyone submitting finishes early and 
   assert.equal(result(h), undefined);
   await h.portrait.handle(body(submit(b), B)).afterReply();
   assert.equal(h.tasks.size, 1); // Only the 60-second reply window remains.
-  assert.match(resultText(h), /supportive/);
-  assert.match(resultText(h), /distracted/);
+  assert.match(resultText(h), /supportive/i);
+  assert.match(resultText(h), /distracted/i);
   assert.ok(result(h).body.embeds[0].title);
   assert.deepEqual(result(h).body.allowed_mentions, { parse: [] });
   assert.equal(resultText(h).includes(B), false); // No author-to-word attribution.
@@ -242,12 +288,18 @@ test('fair rotation survives restart and interrupted messages are closed without
 
 test('publication failure, final edit failure, and lost Gateway connection cannot leave an active lock', async () => {
   let failPost = true, failPatch = false;
-  const h = harness({ apiHook: (_path, options) => {
-    if ((failPost && options.method === 'POST') || (failPatch && options.method === 'PATCH')) throw Object.assign(new Error('denied'), { status: 403 });
+  const h = harness({ apiHook: (path, options) => {
+    if ((failPost && options.method === 'POST' && path.startsWith('channels/')) || (failPatch && options.method === 'PATCH')) throw Object.assign(new Error('denied'), { status: 403 });
   } });
   await h.start();
   assert.equal(h.state().active, null);
   assert.deepEqual(h.state().seen, []);
+  // A failed start is the one case that is reported privately, as a follow-up and never by editing the panel.
+  const note = h.calls.at(-1);
+  assert.equal(note.method, 'POST');
+  assert.match(note.path, /^webhooks\/\d+\/private-test-token-\d+$/);
+  assert.equal(note.body.flags, 64);
+  assert.match(note.body.content, /Could not start/);
   failPost = false;
   await h.start();
   failPatch = true;
@@ -286,7 +338,7 @@ test('main interaction router dispatches portrait buttons and handles missing pi
   const h = harness();
   const handle = createInteractions({ api: h.config.api, guildId, portrait: h.portrait });
   const started = handle(body());
-  assert.equal(started.response.type, 5);
+  assert.equal(started.response.type, 6);
   await started.afterReply();
   assert.match(handle(body('mermer:panel:picker', C)).response.data.content, /not configured/);
   assert.match(handle(body('mermer:panel:picker', B)).response.data.content, /not configured/);

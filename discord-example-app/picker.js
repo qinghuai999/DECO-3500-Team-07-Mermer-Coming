@@ -24,8 +24,9 @@ export function createPicker({ api, roster, store, guildId, voiceChannelId, text
     if (!snapshot.ids.includes(body.member?.user?.id)) return `Join <#${voiceChannelId}> to participate.`;
     return null;
   }
-  async function privateResult(body, content) {
-    await api(`webhooks/${body.application_id}/${body.token}/messages/@original`, { method: 'PATCH', body: closed(content) });
+  // A follow-up, never an edit of @original: after a silent acknowledgement, @original is the public panel.
+  async function privateNote(body, content) {
+    await api(`webhooks/${body.application_id}/${body.token}`, { method: 'POST', body: { ...closed(content), flags: 64 } });
   }
   function candidates(round) {
     const snapshot = roster.snapshot();
@@ -115,7 +116,8 @@ export function createPicker({ api, roster, store, guildId, voiceChannelId, text
     catch { active = null; report(); return reply('Random Pick could not save its state. Please check the data volume.'); }
     requests.set(body.id, now() + 15 * 60 * 1000);
     return {
-      response: { type: 5, data: { flags: 64 } },
+      // Acknowledge silently: the public draw is the confirmation. Only a failed start is reported privately.
+      response: { type: 6 },
       afterReply: async () => {
         try {
           const sent = await api(`channels/${textChannelId}/messages`, { method: 'POST', body: {
@@ -127,10 +129,8 @@ export function createPicker({ api, roster, store, guildId, voiceChannelId, text
           else { round.status = 'finding'; later(round, roll, 600); }
         } catch {
           await end(round, 'Random Pick could not start. Please try again later.');
-          await privateResult(body, 'Could not confirm the draw. Check the channel before trying again.');
-          return;
+          await privateNote(body, 'Could not confirm the draw. Check the channel before trying again.');
         }
-        await privateResult(body, 'Random Pick is running in this channel.');
       },
     };
   }
