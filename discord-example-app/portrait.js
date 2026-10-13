@@ -1,5 +1,6 @@
 import { randomBytes, randomInt } from 'node:crypto';
-import { WORD_GROUPS, portraitText, wordLabel } from './portrait-text.js';
+import { WORD_GROUPS, portraitText, portraitTone, wordLabel } from './portrait-text.js';
+import { createPortraitReply } from './portrait-reply.js';
 
 const mentions = { parse: [] };
 const reply = content => ({ response: { type: 4, data: { content, flags: 64, allowed_mentions: mentions } } });
@@ -13,6 +14,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
   let active = null, healthy = true, recovering = Boolean(interrupted);
   const requests = new Map();
   const duration = 30_000;
+  const replies = createPortraitReply({ api, guildId, textChannelId, now, choose, schedule, unschedule, report });
   function save(round = active) {
     try {
       store.save({ seen, active: round ? { channel: round.channel, message: round.message ?? null } : null });
@@ -72,7 +74,7 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
     if (!content && !snapshot.ready) content = 'Trait Picker ended because the voice connection was interrupted. Please try again.';
     if (!content && !snapshot.ids.includes(round.target)) content = 'Trait Picker ended because the selected player left the game voice channel.';
     round.cancelReason = content;
-    let resultCard;
+    let resultCard, offer;
     if (!content) {
       // Finalize each remaining draft at the deadline; an untouched selector is a blank response.
       for (const [user, word] of round.choices) if (snapshot.ids.includes(user)) round.submitted.set(user, word);
@@ -81,12 +83,15 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
       resultCard = { title: result.title, description: `**<@${round.target}>**\n\n${result.sentence}`,
         author: { name: '🎨 Group Reflection' }, color: 0x57f287,
         footer: { text: 'Built from anonymous group input · Pally Together!' } };
-      content = '';
+      // The selected player may answer the portrait; a blank one has nothing to answer.
+      const tone = portraitTone(words);
+      if (tone) offer = replies.offer({ id: round.id, target: round.target, message: round.message, tone, embed: resultCard });
+      content = offer?.content ?? '';
     }
     try {
       // Editing a normal bot message does not expose who triggered the round.
-      await api(`channels/${round.channel}/messages/${round.message}`, { method: 'PATCH', body: { ...closed(content), ...(resultCard ? { embeds: [resultCard] } : {}) } });
-    } catch { report(); }
+      await api(`channels/${round.channel}/messages/${round.message}`, { method: 'PATCH', body: { ...closed(content), ...(resultCard ? { embeds: [resultCard] } : {}), ...(offer ? { components: offer.components } : {}) } });
+    } catch { replies.cancel(round.id); report(); }
     finally {
       await cleanPanels(round);
       round.choices.clear(); round.views.clear();
@@ -190,6 +195,8 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
   }
   function handle(body) {
     if (body.data?.custom_id === 'mermer:panel:portrait') return start(body);
+    // Replying needs neither an active round nor voice membership, only the result card.
+    if (/^mermer:portrait:(reply|say|batch|write|own):/.test(body.data?.custom_id ?? '')) return replies.handle(body);
     const match = /^mermer:portrait:(open|word|submit|refresh):([a-f0-9]{20})(?::(\d+))?(?::([a-z-]+))?$/.exec(body.data?.custom_id ?? '');
     if (!match) return reply('This portrait button is no longer supported.');
     const terminal = content => match[1] === 'open' ? reply(content) : { response: { type: 7, data: closed(content) } };
@@ -239,6 +246,6 @@ export function createPortrait({ api, roster, store, guildId, voiceChannelId, te
       } catch { report(); }
       finally { interrupted = null; recovering = false; save(null); }
     },
-    dispose() { unsubscribe(); if (active?.timer) unschedule(active.timer); },
+    dispose() { unsubscribe(); if (active?.timer) unschedule(active.timer); replies.dispose(); },
   };
 }

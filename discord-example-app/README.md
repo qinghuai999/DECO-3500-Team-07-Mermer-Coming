@@ -1,10 +1,12 @@
 # Mermer Discord bot
 
-使用 `/social` 在当前频道调出三按钮面板，不向其他频道成员显示触发者。Funny Exit 支持英文借口的私密预览、换一条、发送和取消。Portrait 与 Random Picker 仅允许绑定的游戏语音频道成员在指定文字频道参与。
+使用 `/social` 在当前频道调出三按钮面板（Random Pick、Trait Picker、Excuse Generator），不向其他频道成员显示触发者。Excuse Generator 先私密选择六个类别之一，再预览、换一条、发送或取消；也可以直接用 `/excuse` 打开。Trait Picker 与 Random Pick 仅允许绑定的游戏语音频道成员在指定文字频道参与。
 
-Portrait 选中一个词即提交并关闭私密控件；全部参与者提交后立即出结果，否则最多等待 10 秒，未选词按空白处理。结果来自本地英文模板，无外部 AI。Random Picker 公平轮换选人，仅被选者可以选择 `I'll Invite Someone` 完成本轮或 `Pass / Draw Again` 重抽；所有人都 Pass/离开或 60 秒未回应时结束。语音名单自动同步，新加入者从下一轮参与。
+Trait Picker 每轮最多 30 秒：点词只是高亮，可以随时更换，`Other…` 换一组词且不延长时间，按 `Submit` 才锁定；全部参与者提交后立即出结果，否则到时自动提交当前高亮的词，未选词按空白处理。结果来自本地英文模板，无外部 AI。Random Pick 公平轮换选人，用同一条消息依次显示查找、滚动、结果，约 3 秒完成，没有 Pass / Draw Again。语音名单自动同步，新加入者从下一轮参与。
 
-运行配置使用 `.env.sample` 中的 `GUILD_ID`、`GAME_VOICE_CHANNEL_ID`、`SOCIAL_TEXT_CHANNEL_ID`。Docker 保留 `STATE_DIR=/app/data` 和 `-v mermer-data:/app/data`，两个功能分别保存轮换记录；私密选词及交互 token 不写入数据文件。更新后重建并替换容器，再用 `/social` 调出新面板，无需新增命令注册。测试使用 `npm test`，不调用真实 Discord。原来的 [部署说明](./PANEL.md) 保留为早期部署参考，其中待开放状态与画像计时规则以本段为准。
+Trait Picker 出结果后，被评价者可以回应，回应写回原结果卡片，不另发消息。卡片下方的 `Reply` 只有被评价者能用，其他人点击只收到私密提示。点击后私密显示三句回应，句子本身就是按钮，点一下即发出；`Another batch` 换一批，`Write my own` 弹出输入框自己写（最多 200 字）。回应句按画像语气选取：只有正面词用好评语料，只有负面词用差评语料，正负混合或只有中性词用中性语料，三类各 10 句，定义在 `portrait-text.js` 的 `REPLIES`，每句不超过 80 字符（Discord 按钮上限）。快捷回应限时 60 秒，到时不发任何“未回应”提示，卡片按钮变为 `Write a reply`；自己写没有时间限制，机器人重启后仍可用。每张卡片只能回应一次；全员空白的画像没有回应入口；回应阶段不占用“进行中”状态，可以立刻开始下一轮。
+
+运行配置使用 `.env.sample` 中的 `GUILD_ID`、`GAME_VOICE_CHANNEL_ID`、`SOCIAL_TEXT_CHANNEL_ID`。Docker 保留 `STATE_DIR=/app/data` 和 `-v mermer-data:/app/data`，两个功能分别保存轮换记录；私密选词、回应候选及交互 token 不写入数据文件。建议机器人在指定文字频道拥有 Read Message History（读取消息历史）权限，写入回应前会先读回卡片确认没有重复回应；没有该权限时回应仍可发出。更新后重建并替换容器，再用 `/social` 调出新面板，无需新增命令注册或环境变量。测试使用 `npm test`，不调用真实 Discord。原来的 [部署说明](./PANEL.md) 保留为早期部署参考，其中待开放状态与画像计时规则以本段为准。
 
 以下为项目继承的 Discord 入门示例文档，示例中的游戏功能和文件结构不代表当前实现。线上部署使用 EC2 + Caddy，无需本机公网隧道。
 

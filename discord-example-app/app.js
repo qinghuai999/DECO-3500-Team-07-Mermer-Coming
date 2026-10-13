@@ -52,7 +52,7 @@ export function createApp({ api = discordApi, publicKey = process.env.PUBLIC_KEY
       return res.status(400).json({ error: 'unknown command' });
     }
 
-    if (type === InteractionType.MESSAGE_COMPONENT) {
+    if (type === InteractionType.MESSAGE_COMPONENT || type === InteractionType.MODAL_SUBMIT) {
       return respondToInteraction(req, res);
     }
 

@@ -7,7 +7,7 @@ import { PANEL_ACTIONS } from '../panel.js';
 import { createPortrait } from '../portrait.js';
 import { createPicker } from '../picker.js';
 
-test('signed HTTP routes exercise Exit, Social, editable Portrait and Picker; unsigned requests fail', async () => {
+test('signed HTTP routes exercise Exit, Social, editable Portrait with replies and Picker; unsigned requests fail', async () => {
   const keys = generateKeyPairSync('ed25519');
   const publicKey = keys.publicKey.export({ type: 'spki', format: 'der' }).subarray(-32).toString('hex');
   const writes = [];
@@ -93,6 +93,14 @@ test('signed HTTP routes exercise Exit, Social, editable Portrait and Picker; un
     assert.ok(JSON.stringify(writes.findLast(call => call.path.startsWith('channels/')).body).toLowerCase().includes(choice.label.toLowerCase()));
     assert.match(writes.at(-1).body.content, /Submitted/);
     assert.deepEqual(writes.at(-1).body.components, []);
+    const card = writes.findLast(call => call.path.startsWith('channels/')).body;
+    const quick = await post({ ...base, message: { id: '444444444444444444' }, data: { custom_id: card.components[0].components[0].custom_id } });
+    assert.equal(quick.data.flags, 64);
+    assert.equal(quick.data.components.length, 4);
+    const replyDone = new Promise(resolve => { finishDelivery = resolve; });
+    assert.deepEqual(await post({ ...base, type: 5, data: { custom_id: 'mermer:portrait:own:444444444444444444',
+      components: [{ type: 1, components: [{ type: 4, custom_id: 'text', value: 'Fair enough.' }] }] } }), { type: 5, data: { flags: 64 } });
+    await replyDone;
     const pickerDone = new Promise(resolve => { finishDelivery = resolve; });
     assert.deepEqual(await post({ ...base, id: '999999999999999997', data: { custom_id: PANEL_ACTIONS.picker } }),
       { type: 5, data: { flags: 64 } });

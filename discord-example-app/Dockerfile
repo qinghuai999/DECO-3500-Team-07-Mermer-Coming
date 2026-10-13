@@ -7,7 +7,7 @@ RUN npm ci --omit=dev
 
 COPY app.js commands.js excuses.js utils.js excuses.json ./
 COPY discord-api.js panel.js publish-panel.js interactions.js ./
-COPY portrait.js portrait-text.js portrait-store.js portrait-runtime.js voice-roster.js ./
+COPY portrait.js portrait-text.js portrait-reply.js portrait-store.js portrait-runtime.js voice-roster.js ./
 COPY picker.js ./
 
 ENV NODE_ENV=production

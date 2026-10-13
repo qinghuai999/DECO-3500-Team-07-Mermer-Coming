@@ -160,7 +160,7 @@ test('solo selection does not end the round; manual Submit finishes without wait
   assert.equal(result(h), undefined);
   await h.portrait.handle(body(submit(latest), A)).afterReply();
   assert.match(resultText(h), /patient/);
-  assert.equal(h.tasks.size, 0);
+  assert.equal(h.tasks.size, 1); // Only the 60-second reply window remains.
   assert.equal(h.state().active, null);
   const cleaned = h.calls.filter(call => call.path.startsWith('webhooks/') && /Submitted/.test(call.body.content));
   assert.equal(cleaned.length, 2);
@@ -177,7 +177,7 @@ test('players get different button sets; everyone submitting finishes early and 
   await h.portrait.handle(body(submit(a), A)).afterReply();
   assert.equal(result(h), undefined);
   await h.portrait.handle(body(submit(b), B)).afterReply();
-  assert.equal(h.tasks.size, 0);
+  assert.equal(h.tasks.size, 1); // Only the 60-second reply window remains.
   assert.match(resultText(h), /supportive/);
   assert.match(resultText(h), /distracted/);
   assert.ok(result(h).body.embeds[0].title);
