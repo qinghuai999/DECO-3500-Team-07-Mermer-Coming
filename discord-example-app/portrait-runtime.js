@@ -6,7 +6,7 @@ import { createPicker } from './picker.js';
 export function createPortraitRuntime({ api, env = process.env }) {
   const { GUILD_ID: guildId, GAME_VOICE_CHANNEL_ID: voiceChannelId, SOCIAL_TEXT_CHANNEL_ID: textChannelId } = env;
   if (![guildId, voiceChannelId, textChannelId].every(id => /^\d{17,20}$/.test(id ?? ''))) {
-    console.log('Player Portrait needs GUILD_ID, GAME_VOICE_CHANNEL_ID and SOCIAL_TEXT_CHANNEL_ID.');
+    console.log('Trait Picker and Random Pick need GUILD_ID, GAME_VOICE_CHANNEL_ID and SOCIAL_TEXT_CHANNEL_ID.');
     return null;
   }
   const roster = createVoiceRoster({ guildId, channelId: voiceChannelId });

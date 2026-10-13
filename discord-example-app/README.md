@@ -1,122 +1,124 @@
-# Mermer Discord bot
+# Pally Discord bot
 
-使用 `/social` 在当前频道调出三按钮面板（Random Pick、Trait Picker、Excuse Generator），不向其他频道成员显示触发者。Excuse Generator 先私密选择六个类别之一，再预览、换一条、发送或取消；也可以直接用 `/excuse` 打开。Trait Picker 与 Random Pick 仅允许绑定的游戏语音频道成员在指定文字频道参与。这两个功能成功启动时不给点击者发私密确认，公开消息本身就是确认；只有功能已在进行中（包括几乎同时点击）、点击者不在语音频道或不在指定文字频道、或启动失败时，才给点击者一条仅自己可见的提示。
+This directory contains the prototype: a Discord bot with three tools, **Random Pick**, **Trait Picker** and **Excuse Generator**. The Discord application is named Mermer2.0.
 
-Trait Picker 每轮最多 30 秒：点词只是高亮，可以随时更换，`Other…` 换一组词且不延长时间，按 `Submit` 才锁定；全部参与者提交后立即出结果，否则到时自动提交当前高亮的词，未选词按空白处理。词库共 24 个词，分三组各 8 个，每个词只出现在一组里，每组都混有正面、负面、中性词。Random Pick 公平轮换选人，用同一条消息依次显示查找、滚动、结果，约 3 秒完成，没有 Pass / Draw Again。语音名单自动同步，新加入者从下一轮参与。
+- To try the bot, or for an overview of the project, see the [repository README](../README.md).
+- To set up channels, permissions and configuration in Discord, see [PANEL.md](./PANEL.md).
+- To deploy to the server, see [`scripts/CICD-EC2.md`](../scripts/CICD-EC2.md).
 
-画像文本全部手写，没有固定句式，也不调用外部 AI，语料在 `portrait-lines.json`：每个词有自己的称号、句子和两句收尾短句（24 个），每一对词有专门的称号和句子（276 个）。选中一个词用单词条目，两个词用词对条目；三个词及以上按“倾向反差最大的先配对”拆成若干对，各用各的句子，落单的词接它的收尾短句，称号取第一对的。结果只取决于选中了哪些词，与谁选、选的顺序和重复次数无关。修改语料后跑 `npm test`：测试会检查 300 个条目齐全、句子恰好包含自己的词且不含其他词库词、称号不含词库词、没有重复。
+## How it behaves
 
-Trait Picker 出结果后，被评价者可以回应，回应写回原结果卡片，不另发消息。卡片下方的 `Reply` 只有被评价者能用，其他人点击只收到私密提示。点击后私密显示三句回应，句子本身就是按钮，点一下即发出；`Another batch` 换一批，`Write my own` 弹出输入框自己写（最多 200 字）。回应句按画像语气选取：只有正面词用好评语料，只有负面词用差评语料，正负混合或只有中性词用中性语料，三类各 10 句，定义在 `portrait-text.js` 的 `REPLIES`，每句不超过 80 字符（Discord 按钮上限）。快捷回应限时 60 秒，到时不发任何“未回应”提示，卡片按钮变为 `Write a reply`；自己写没有时间限制，机器人重启后仍可用。每张卡片只能回应一次；全员空白的画像没有回应入口；回应阶段不占用“进行中”状态，可以立刻开始下一轮。
+### The panel
 
-运行配置使用 `.env.sample` 中的 `GUILD_ID`、`GAME_VOICE_CHANNEL_ID`、`SOCIAL_TEXT_CHANNEL_ID`。Docker 保留 `STATE_DIR=/app/data` 和 `-v mermer-data:/app/data`，两个功能分别保存轮换记录；私密选词、回应候选及交互 token 不写入数据文件。建议机器人在指定文字频道拥有 Read Message History（读取消息历史）权限，写入回应前会先读回卡片确认没有重复回应；没有该权限时回应仍可发出。更新后重建并替换容器，再用 `/social` 调出新面板，无需新增命令注册或环境变量。测试使用 `npm test`，不调用真实 Discord。原来的 [部署说明](./PANEL.md) 保留为早期部署参考，其中待开放状态与画像计时规则以本段为准。
+`/social` brings up the three-button panel in the current channel without showing other channel members who asked for it. Trait Picker and Random Pick can only be used by members of the configured game voice channel, from the configured text channel. Excuse Generator can be used by anyone in the server.
 
-以下为项目继承的 Discord 入门示例文档，示例中的游戏功能和文件结构不代表当前实现。线上部署使用 EC2 + Caddy，无需本机公网隧道。
+When Trait Picker or Random Pick starts successfully, the person who clicked gets no private confirmation: the public message is the confirmation. A note that only the clicker can see is sent only when the tool is already in progress (including near-simultaneous clicks), when the clicker is not in the voice channel or not in the configured text channel, or when the start fails.
 
-## Original starter guide
+### Excuse Generator
 
-This project contains a basic rock-paper-scissors-style Discord app written in JavaScript, built for the [getting started guide](https://discord.com/developers/docs/getting-started).
+Excuse Generator first asks privately for one of six categories (Leave, Decline, Cancel, Defence, Delay, Surprise Me), then shows a private preview with `Send`, `Another One` and `Cancel`. Only `Send` posts publicly, with the player's name and a plain announcement line. It can also be opened directly with `/excuse`. The excuses are in `excuses.json`.
 
-![Demo of app](https://github.com/discord/discord-example-app/raw/main/assets/getting-started-demo.gif?raw=true)
+### Random Pick
 
-## Project structure
-Below is a basic overview of the project structure:
+Random Pick selects one player from the voice channel by fair rotation: nobody is selected twice before everyone present has been selected once. It shows finding, rolling and result in a single message in about three seconds. There is no Pass or Draw Again; anyone can start another draw.
 
-```
-├── examples    -> short, feature-specific sample apps
-│   ├── app.js  -> finished app.js code
-│   ├── button.js
-│   ├── command.js
-│   ├── modal.js
-│   ├── selectMenu.js
-├── .env.sample -> sample .env file
-├── app.js      -> main entrypoint for app
-├── commands.js -> slash command payloads + helpers
-├── game.js     -> logic specific to RPS
-├── utils.js    -> utility functions and enums
-├── package.json
-├── README.md
-└── .gitignore
-```
+### Trait Picker
 
-## Running app locally
+A round lasts at most 30 seconds. The bot names one player by fair rotation, and every player in the voice channel, including the one named, privately picks one word.
 
-Before you start, you'll need to install [NodeJS](https://nodejs.org/en/download/) and [create a Discord app](https://discord.com/developers/applications) with the proper permissions:
-- `applications.commands`
-- `bot` (with Send Messages enabled)
+- Clicking a word only highlights it, and it can be changed at any time.
+- `Other…` shows another group of words without extending the time.
+- `Submit` locks the choice.
+- The result is published as soon as every participant has submitted. Otherwise the highlighted words are submitted automatically at the deadline, and no selection counts as blank.
 
+The vocabulary has 24 words in three groups of eight. Each word appears in exactly one group, and every group mixes positive, negative and neutral words. The voice channel roster is kept in sync automatically: players who join late take part from the next round, and a player who leaves loses their word for the current round.
 
-Configuring the app is covered in detail in the [getting started guide](https://discord.com/developers/docs/getting-started).
+### Portrait text
 
-### Setup project
+All portrait text is written by hand, with no fixed sentence frame and no external AI. It lives in `portrait-lines.json`:
 
-First clone the project:
-```
-git clone https://github.com/discord/discord-example-app.git
-```
+- every word has its own title, sentence and two closing lines (24 entries);
+- every pair of words has its own title and sentence (276 entries).
 
-Then navigate to its directory and install dependencies:
-```
-cd discord-example-app
-npm install
-```
-### Get app credentials
+One selected word uses the word entry and two use the pair entry. Three or more are split into pairs, pairing the words whose leanings contrast most first; each pair uses its own sentence, a word left over adds one of its closing lines, and the title is that of the first pair. The result depends only on which words were selected, not on who selected them, in what order, or how many times.
 
-Fetch the credentials from your app's settings and add them to a `.env` file (see `.env.sample` for an example). You'll need your app ID (`APP_ID`), bot token (`DISCORD_TOKEN`), and public key (`PUBLIC_KEY`).
+After editing the library, run `npm test`. The tests check that all 300 entries exist, that each sentence contains exactly its own words and no other vocabulary word, that titles contain no vocabulary word, and that nothing is duplicated.
 
-Fetching credentials is covered in detail in the [getting started guide](https://discord.com/developers/docs/getting-started).
+### Replying to a portrait
 
-> 🔑 Environment variables can be added to the `.env` file in Glitch or when developing locally, and in the Secrets tab in Replit (the lock icon on the left).
+After a result, the player described can reply. The reply is written onto the original result card and no extra message is sent.
 
-### Install slash commands
+- Only that player can use the `Reply` button under the card. Anyone else who clicks it gets a private note.
+- Clicking it privately shows three reply lines. Each line is itself a button, and one click posts it.
+- `Another batch` shows three more. `Write my own` opens a pop-up for a reply of up to 200 characters.
+- Reply lines match the tone of the portrait: positive words only use the positive lines, negative words only use the negative lines, and a mix of both or neutral words only use the neutral lines. There are ten lines for each tone, defined as `REPLIES` in `portrait-text.js`. Each is at most 80 characters, which is Discord's limit for a button label.
+- Quick replies are limited to 60 seconds. When the time is up no “did not respond” note is posted, and the button on the card becomes `Write a reply`.
+- Writing your own has no time limit and still works after the bot restarts.
+- Each card accepts one reply. A portrait where everyone was blank has no reply button.
+- The reply step does not hold the “in progress” state, so the next round can start straight away.
 
-The commands for the example app are set up in `commands.js`. All of the commands in the `ALL_COMMANDS` array at the bottom of `commands.js` will be installed when you run the `register` command configured in `package.json`:
+## Files
 
-```
-npm run register
-```
+| File | Purpose |
+|---|---|
+| `app.js` | HTTP entry point. Verifies Discord's signature and passes interactions on |
+| `interactions.js` | Routes commands, buttons and pop-up submissions; contains the Excuse Generator flow |
+| `panel.js`, `publish-panel.js` | The three-button panel, and the optional pinned panel |
+| `commands.js` | Definitions and registration of `/social`, `/excuse` and `/test` |
+| `excuses.js`, `excuses.json` | Excuse categories and the excuse library |
+| `picker.js` | Random Pick |
+| `portrait.js` | Trait Picker rounds |
+| `portrait-text.js`, `portrait-lines.json` | Vocabulary, portrait generation, and the reply lines |
+| `portrait-reply.js` | The reply step |
+| `portrait-store.js` | Saves rotation history to `STATE_DIR` |
+| `portrait-runtime.js` | Starts Trait Picker and Random Pick with the voice channel roster |
+| `voice-roster.js` | Tracks who is in the voice channel through the Discord Gateway |
+| `discord-api.js`, `utils.js` | Calls to the Discord REST API |
+| `test/` | Automated tests |
+| `Dockerfile` | The container image. It copies files by name, so a new module must be added to it; a test checks this |
+| `examples/`, `game.js`, `assets/` | Left over from Discord's example app. Pally does not use them |
 
-### Run the app
+The server answers `GET /` with `ok` as a health check, returns one random excuse as JSON at `GET /api/excuse`, and receives interactions at `POST /interactions`.
 
-After your credentials are added, go ahead and run the app:
+## Running it
 
-```
-node app.js
-```
+**Requirements:** Node.js 24, and a Discord application with the `bot` and `applications.commands` scopes that has been added to your server.
 
-> ⚙️ A package [like `nodemon`](https://github.com/remy/nodemon), which watches for local changes and restarts your app, may be helpful while locally developing.
-
-If you aren't following the [getting started guide](https://discord.com/developers/docs/getting-started), you can move the contents of `examples/app.js` (the finished `app.js` file) to the top-level `app.js`.
-
-### Set up interactivity
-
-The project needs a public endpoint where Discord can send requests. To develop and test locally, you can use something like [`ngrok`](https://ngrok.com/) to tunnel HTTP traffic.
-
-Install ngrok if you haven't already, then start listening on port `3000`:
-
-```
-ngrok http 3000
+```bash
+npm ci
+npm test
 ```
 
-You should see your connection open:
+The tests use stand-ins for Discord and send nothing to a real server.
 
-```
-Tunnel Status                 online
-Version                       2.0/2.0
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    https://1234-someurl.ngrok.io -> localhost:3000
+To run the bot:
 
-Connections                  ttl     opn     rt1     rt5     p50     p90
-                              0       0       0.00    0.00    0.00    0.00
-```
+1. Copy `.env.sample` to `.env` and fill it in. The variables are explained in [PANEL.md](./PANEL.md#configuration).
+2. Register the commands:
 
-Copy the forwarding address that starts with `https`, in this case `https://1234-someurl.ngrok.io`, then go to your [app's settings](https://discord.com/developers/applications).
+   ```bash
+   npm run register
+   ```
 
-On the **General Information** tab, there will be an **Interactions Endpoint URL**. Paste your ngrok address there, and append `/interactions` to it (`https://1234-someurl.ngrok.io/interactions` in the example).
+3. Start the bot:
 
-Click **Save Changes**, and your app should be ready to run 🚀
+   ```bash
+   npm start
+   ```
 
-## Other resources
-- Read **[the documentation](https://discord.com/developers/docs/intro)** for in-depth information about API features.
-- Browse the `examples/` folder in this project for smaller, feature-specific code examples
-- Join the **[Discord Developers server](https://discord.gg/discord-developers)** to ask questions about the API, attend events hosted by the Discord API team, and interact with other devs.
-- Check out **[community resources](https://discord.com/developers/docs/topics/community-resources#community-resources)** for language-specific tools maintained by community members.
+4. Discord sends interactions to a public HTTPS address. In the Discord developer portal, set the application's Interactions Endpoint URL to `https://<your-host>/interactions`. For local development, a tunnel such as [ngrok](https://ngrok.com/) can provide that address; the live deployment uses EC2 and Caddy instead.
+
+The bot also keeps a Gateway connection open to follow who is in the voice channel. It uses the Guilds and Guild Voice States intents, which need no special approval.
+
+## Data and privacy
+
+- The only data written to disk is the fair-rotation history of each tool and the location of a round in progress, so that it can be closed after a restart. With Docker, keep `STATE_DIR=/app/data` and the volume `-v mermer-data:/app/data`. The two tools store their history separately.
+- Private word selections, reply suggestions and interaction tokens are never written to the data files.
+
+## Updating a running bot
+
+After an update, rebuild and replace the container, then bring up a new panel with `/social`. Commands only need to be registered again when their definitions change.
+
+## Acknowledgement
+
+The bot started from Discord's [example app](https://github.com/discord/discord-example-app) and its [getting started guide](https://discord.com/developers/docs/getting-started). The example is released under the MIT licence; see [LICENSE](./LICENSE).

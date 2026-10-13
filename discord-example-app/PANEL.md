@@ -1,127 +1,141 @@
-# Discord 控制面板
+# Setting up the control panel in Discord
 
-## 当前实现
+This page covers the Discord side of running Pally: channels, permissions, configuration, commands, the optional pinned panel, and a checklist for confirming that everything works. What each tool does is described in [README.md](./README.md). Deploying the bot to the server is described in [`scripts/CICD-EC2.md`](../scripts/CICD-EC2.md).
 
-- `/social`：在当前频道底部发送一条新的三按钮面板。命令先私密确认，公开面板通过普通机器人消息发送，不显示调用者、不引用命令、不提及用户。频道成员可以点击。每次独立调用会发新面板，不自动置顶、不删除旧面板。此处匿名指不向其他频道成员显示触发者，Discord 和处理请求的机器人仍知道调用者。
-- 一条消息包含 Funny Exit、Collaborative Portrait、Random Picker 三个按钮，发布时自动置顶。
-- Funny Exit：私密预览 → Another One / Send / Cancel。只有确认 Send 才会在结果频道公开发送并标明离开者。
-- Portrait 和 Random Picker：入口可点击，当前仅给点击者返回“尚未开放”，未实现多人会话、AI 画像、公平轮换或数据库。
-- 保留 `/test`，`/excuse` 改为同样的私密预览流程。
-- 再次发布会查找并更新本机器人已有面板；也可指定 `PANEL_MESSAGE_ID` 精确更新。机器人重启不会重新发面板。
+## How the panel works
 
-Discord 置顶消息不会一直悬浮在聊天窗口顶部。推荐创建独立的 `#bot-panel` 普通文字频道，只有机器人发消息；互动结果发到游戏聊天频道。把 `#bot-panel` 放在频道列表前面，玩家打开它即可看到三个入口。Discord 无法由机器人强制所有客户端进服后自动打开指定频道。
+- Any member types `/social` in the team's text channel. The command is acknowledged privately, and the panel is sent as an ordinary bot message that does not show the caller, quote the command or mention the user.
+- The panel has three buttons: **Random Pick**, **Trait Picker** and **Excuse Generator**.
+- Each call sends a new panel at the bottom of the channel. Old panels are not deleted and keep working.
+- “Anonymous” means that the person who triggered something is not shown to other channel members. Discord and the bot still know who it was.
 
-## 1. 配置频道
+## Channels
 
-在 Discord 创建 `#bot-panel`，为普通玩家允许 View Channel、Read Message History，关闭 Send Messages。按钮仍可使用。需要检查其他身份组覆盖权限，确保普通玩家不能持续发送消息把面板挤走。
+Pally is configured for one server, one text channel and one voice channel.
 
-机器人在面板频道需要 View Channel、Read Message History、Send Messages、Embed Links、Pin Messages；在游戏聊天频道需要 View Channel、Send Messages。无需授予 Administrator。角色权限为英文列出，中文客户端对应查看频道、读取消息历史、发送消息、嵌入链接、置顶消息。
+| Channel | Setting | Used for |
+|---|---|---|
+| Text channel | `SOCIAL_TEXT_CHANNEL_ID` | The panel, and all Trait Picker and Random Pick messages. These two tools only work from this channel |
+| Voice channel | `GAME_VOICE_CHANNEL_ID` | Defines who is playing. Trait Picker and Random Pick only accept players who are in this voice channel |
 
-打开 Discord 用户设置 → Advanced → Developer Mode，右键两个频道 → Copy Channel ID。`GUILD_ID` 是服务器 ID，不是频道 ID。
+Excuse Generator works in any channel of the server and for any member.
 
-## 2. 更新 EC2 代码与配置
+To copy an ID, turn on Discord User Settings → Advanced → Developer Mode, then right-click the server or channel and choose Copy ID. `GUILD_ID` is the server ID, not a channel ID.
 
-当前由开发者独自调试：先将本次代码提交并推送到团队仓库的 `kiki_develop`，让现有 EC2 和机器人运行开发版。验收后再通过 PR 合并 `main`。在 **EC2 Session Manager 终端**执行（已有未提交修改时先处理，勿强制覆盖）：
+## Permissions
 
-Session Manager 新会话可能默认使用 `ssm-user`，而项目与运行配置属于 `ec2-user`。先单独执行以下命令，切换后再粘贴后续命令：
+| Who | Where | Permissions |
+|---|---|---|
+| Bot | Text channel | View Channel, Send Messages, Embed Links, Read Message History |
+| Bot | Text channel, only for a pinned panel | Pin Messages |
+| Bot | Voice channel | View Channel |
+| Players | Text channel | Use Application Commands |
+| Players | Voice channel | Connect |
 
-```bash
-sudo -iu ec2-user
-```
+Administrator does not need to be granted.
 
-然后进入项目目录。各步骤使用 `&&`，前一步失败就不会继续构建：
+Read Message History lets the bot read a result card back before adding a reply to it, and is required by the pinned-panel command, which searches the channel for an existing panel. Without it, replies can still be posted.
 
-```bash
-cd /home/ec2-user/DECO-3500-Team-07-Mermer-Coming &&
-git fetch origin &&
-git switch kiki_develop &&
-git pull --ff-only origin kiki_develop &&
-cd discord-example-app &&
-sudo docker build -t mermer-bot:node24 .
-```
+## Configuration
 
-确认构建成功才进行后续步骤。若 Git 提示输入密码，使用有仓库读取权限的 GitHub token，不是账户密码。
+Set these in `.env` locally, or in `bot.env` on the server. `.env.sample` lists them all.
 
-编辑现有服务器配置，保留已有 APP_ID、PUBLIC_KEY、DISCORD_TOKEN 等内容：
+| Variable | Required | Meaning |
+|---|---|---|
+| `APP_ID`, `DISCORD_TOKEN`, `PUBLIC_KEY` | Yes | The Discord application's ID, bot token and public key |
+| `GUILD_ID` | Yes | The server |
+| `GAME_VOICE_CHANNEL_ID` | Yes | The voice channel whose members take part |
+| `SOCIAL_TEXT_CHANNEL_ID` | Yes | The text channel for the panel and results |
+| `STATE_DIR` | No | Where rotation history is stored. Defaults to `./data`; in Docker it is `/app/data` on the `mermer-data` volume |
+| `RESULT_CHANNEL_ID` | No | Where Excuse Generator posts a sent excuse. If empty, it posts in the channel where the excuse was opened |
+| `PANEL_CHANNEL_ID` | Only for a pinned panel | The channel in which `npm run panel` publishes |
+| `PANEL_MESSAGE_ID` | No | The exact pinned panel message to update |
 
-## 3. 更新机器人容器
+If `GUILD_ID`, `GAME_VOICE_CHANNEL_ID` or `SOCIAL_TEXT_CHANNEL_ID` is missing or not a valid ID, Trait Picker and Random Pick are switched off: their buttons answer privately that the tool is not configured yet. Excuse Generator still works.
 
-先保留旧容器用于回退。以下备份名称如果已存在，需要换一个未使用的名称：
+## Registering the commands
 
-```bash
-mermer_backup="mermer-bot-backup-$(date +%Y%m%d-%H%M%S)" &&
-sudo docker stop mermer-bot &&
-sudo docker rename mermer-bot "$mermer_backup" &&
-sudo docker run -d \
-  --name mermer-bot \
-  --network mermer-net \
-  --restart unless-stopped \
-  --env-file /home/ec2-user/mermer-runtime/bot.env \
-  -v mermer-data:/app/data \
-  -p 127.0.0.1:3000:3000 \
-  --log-opt max-size=10m \
-  --log-opt max-file=3 \
-  mermer-bot:node24
-```
-
-检查机器人已启动及 HTTPS 仍正常：
+The slash commands `/social`, `/excuse` and `/test` are registered with:
 
 ```bash
-sudo docker logs --tail 50 mermer-bot
-curl -i https://mermerteam07.duckdns.org/
+npm run register
 ```
 
-预期显示 `Listening on port 3000` 和 `ok`。Caddy 与 Discord 的 Interactions Endpoint URL 保持现有配置。
-
-## 4. 注册 /social 并测试
-
-新容器启动成功后执行一次命令注册：
+On the server, run it inside the container:
 
 ```bash
 sudo docker exec mermer-bot npm run register
 ```
 
-该脚本会更新服务器和全局命令列表，保留当前 `/test`、`/excuse` 并加入 `/social`。它会替换本应用原有的命令列表。服务器命令一般可立即测试；必要时重新打开 Discord 命令选择框。
+This replaces the application's command list, for the server in `GUILD_ID` and globally. It only needs to be run again when the command definitions in `commands.js` change. Server commands can usually be used straight away; reopen the Discord command picker if a new command does not appear.
 
-在游戏文字频道输入 `/social`。你会看到私密确认，频道里出现机器人发送的面板。用另一账号查看，应看不到是谁调出了面板。该方式不需要 `PANEL_CHANNEL_ID` 或 Pin Messages 权限；机器人需要查看频道、发送消息、嵌入链接权限，玩家需要 Use Application Commands 权限。Funny Exit 的公开结果仍遵循 `RESULT_CHANNEL_ID` 配置。
+## Optional: a pinned panel
 
-## 可选：发布固定面板并置顶
+A team that wants the panel in a fixed place can publish one pinned panel:
 
 ```bash
 sudo docker exec mermer-bot npm run panel
 ```
 
-该命令会实际发送或更新一条 Discord 面板消息并置顶。成功后打印消息链接及 `PANEL_MESSAGE_ID`，记录它以便后续精确更新。不要对同一频道同时运行多个发布命令。
-
-如果提示面板已保存但置顶失败，补上机器人的 Pin Messages 权限，再次运行即可。重新发布会复用现有面板。也可以使用输出的消息 ID：
-
-```bash
-sudo docker exec -e PANEL_MESSAGE_ID=消息ID mermer-bot npm run panel
-```
-
-仅更新固定面板内容无需重新注册 slash command；新增 `/social` 需要执行上面的注册步骤。
-
-## 5. 验收
-
-1. 用普通玩家账号进入面板频道，确认三个按钮可见、可点击且不能发聊天消息。
-2. 点击 Funny Exit：仅自己看到预览，游戏频道没有消息。
-3. Another One 更换理由；Cancel 结束预览，无公开消息。
-4. 重新打开预览并 Send：游戏频道出现一条消息，重复点击不会重复发送。
-5. 点击另外两个入口：仅自己看到待开放提示。
-6. 再运行发布命令：更新同一条消息，不重复创建面板。
-
-本阶段私密预览保存于单进程内存，10 分钟过期；机器人重启会使旧预览失效，重新点击面板即可。暂不支持多副本部署。网络超时导致发送结果不确定时，先检查结果频道，程序不会自动重发。
-
-如新容器启动失败，可回退旧版本：
+- The command sends a panel message in `PANEL_CHANNEL_ID` and pins it. That channel must be an ordinary text channel in `GUILD_ID`.
+- **Set `PANEL_CHANNEL_ID` to the same channel as `SOCIAL_TEXT_CHANNEL_ID`.** In any other channel only Excuse Generator works; Trait Picker and Random Pick tell the player to use the configured text channel.
+- Running it again finds this bot's existing panel in the channel and updates it instead of creating a second one. To update one exact message, pass the ID that the command printed:
 
 ```bash
-sudo docker rm -f mermer-bot
-sudo docker rename mermer-bot-before-panel mermer-bot
-sudo docker start mermer-bot
+sudo docker exec -e PANEL_MESSAGE_ID=<message-id> mermer-bot npm run panel
 ```
 
-旧版本无法处理新面板按钮；回退后暂时不要使用面板，修复并重新部署再启用。
+- If it reports that the panel was saved but could not be pinned, give the bot the Pin Messages permission and run it again.
+- Do not run several publish commands for the same channel at the same time.
+- Restarting the bot does not publish the panel again, and the bot never publishes it by itself.
 
-本地验证：`npm test`，所有 Discord 写入均由测试替身处理，不会发布真实消息。
+A pinned Discord message does not stay floating at the top of the chat window; players open it from the channel's pinned messages. For everyday use, `/social` is quicker.
 
-参考：[Discord 置顶说明](https://support.discord.com/hc/en-us/articles/221421867-Pin-Messages-FAQ)、[Discord 消息 API](https://docs.discord.com/developers/resources/message)。
+## Acceptance checklist
+
+Use two or three accounts. The accounts that test Random Pick and Trait Picker must be in the voice channel.
+
+**Panel**
+
+1. Type `/social` in the text channel. You get a private confirmation, and the panel appears.
+2. From another account, confirm that nothing shows who brought up the panel.
+
+**Excuse Generator**
+
+3. Click `Excuse Generator`. Only you see the six categories; nothing appears in the channel.
+4. Choose a category. `Another One` changes the excuse, and `Cancel` ends the preview with no public message.
+5. Open a preview again and press `Send`. One message appears with your name and a plain announcement line. Clicking repeatedly does not send it again.
+
+**Random Pick**
+
+6. Click `Random Pick`. One message moves from “Finding players…” to “Rolling…” to the result in about three seconds. The person who clicked gets no private message, and nothing shows who clicked.
+7. Click it again while a draw is running, from any account. Only that account sees “A Random Pick is already in progress.”
+8. Run several draws. Nobody is selected twice before everyone in the voice channel has been selected once.
+
+**Trait Picker**
+
+9. Click `Trait Picker`. The bot names one player and shows `Choose Traits`.
+10. Each account presses `Choose Traits`, picks a word and presses `Submit`. `Other…` shows more words. Word selection is visible only to the player making it.
+11. When everyone has submitted, or after 30 seconds, the result card shows a title and a short text. It shows no list of words, no counts and no names of who chose what.
+12. From an account that is not the named player, press `Reply`. Only that account sees “Only … can reply to this portrait.”
+13. As the named player, press `Reply`, try `Another batch`, then click a line. The reply is added to the same card and the button disappears.
+14. Run another round and wait 60 seconds without replying. The button changes to `Write a reply`, with no message about not responding. Pressing it opens a pop-up; submitting adds the reply to the card.
+
+**Access**
+
+15. From an account that is not in the voice channel, click `Random Pick` or `Trait Picker`. Only that account sees a note asking it to join the voice channel.
+
+## Limits to know about
+
+- Private previews and word selections are held in the memory of one process. Restarting the bot ends a round in progress and invalidates open private panels; start again from the panel. A reply can still be written on an existing result card after a restart.
+- An excuse preview expires after 10 minutes.
+- Running several copies of the bot at once is not supported.
+- If a network timeout leaves it uncertain whether a message was sent, the bot does not resend it. Check the channel first.
+
+## Deploying and rolling back
+
+Deployment replaces the container and keeps the previous one as a backup; if the new container fails to start or fails its health check, the deployment script tries to restore the old one. See [`scripts/CICD-EC2.md`](../scripts/CICD-EC2.md) for deploying from GitHub and [`scripts/DEPLOY-EC2.md`](../scripts/DEPLOY-EC2.md) for running the deployment script by hand.
+
+Local verification: `npm test`. All writes to Discord are handled by test stand-ins, and no real message is published.
+
+References: [Discord's notes on pinning](https://support.discord.com/hc/en-us/articles/221421867-Pin-Messages-FAQ), [Discord message API](https://docs.discord.com/developers/resources/message).

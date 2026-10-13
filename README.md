@@ -147,7 +147,7 @@ To run the bot:
 
 In the text channel the bot needs View Channel, Send Messages, Embed Links and Read Message History. It also needs to see the voice channel.
 
-**Deployment.** The bot runs in a Docker container on an AWS EC2 instance behind Caddy. Every push and pull request to `main` runs the tests. Deployment is started by hand from GitHub: Actions → **Deploy EC2** → Run workflow. It runs the tests again, builds the image on the server, replaces the container and checks that it answers. The full setup is described in [`scripts/CICD-EC2.md`](scripts/CICD-EC2.md) and [`scripts/DEPLOY-EC2.md`](scripts/DEPLOY-EC2.md), which are written in Chinese.
+**Deployment.** The bot runs in a Docker container on an AWS EC2 instance behind Caddy. Every push and pull request to `main` runs the tests. Deployment is started by hand from GitHub: Actions → **Deploy EC2** → Run workflow. It runs the tests again, builds the image on the server, replaces the container and checks that it answers. The full setup is described in [`scripts/CICD-EC2.md`](scripts/CICD-EC2.md) and [`scripts/DEPLOY-EC2.md`](scripts/DEPLOY-EC2.md).
 
 ## Team
 

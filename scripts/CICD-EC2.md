@@ -1,28 +1,28 @@
-# GitHub 点按钮部署 EC2
+# Deploying to EC2 from a button on GitHub
 
-这版是 **自动 CI + 手动触发 CD**：提交到 main 或发起面向 main 的 Pull Request 时自动测试；在 GitHub 点一次 **Deploy EC2 → Run workflow**，会重新测试，然后通过 AWS Systems Manager 自动部署。提交代码不会立即替换线上机器人。
+This setup is **automatic CI plus manually triggered CD**. Tests run automatically on every push to `main` and every pull request to `main`. Clicking **Deploy EC2 → Run workflow** once on GitHub runs the tests again and then deploys automatically through AWS Systems Manager. Pushing code does not replace the live bot straight away.
 
-部署路径：`GitHub main → 测试 → AWS 临时身份 → SSM Run Command → EC2 构建镜像 → 替换容器 → HTTP 检查`。
+Deployment path: `GitHub main → tests → temporary AWS identity → SSM Run Command → EC2 builds the image → container replaced → HTTP check`.
 
-当前仓库：[qinghuai999/DECO-3500-Team-07-Mermer-Coming](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming)。如果已经按旧所有者配置过，先执行下面的转移清单，不用从零重建。
+Current repository: [qinghuai999/DECO-3500-Team-07-Mermer-Coming](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming). If everything was already set up under the old owner, follow the transfer checklist below first; there is no need to rebuild from scratch.
 
-## 仓库已转到 qinghuai999：按此顺序迁移
+## The repository has moved to qinghuai999: migrate in this order
 
-本清单适用于只转移 GitHub 仓库、继续使用原 AWS 账号和 EC2 的情况。2026-09-17 已通过 GitHub API 核对：新所有者 ID 为 `58069249`，仓库 ID 仍为 `1340324828`，默认分支仍为 `main`。
+This checklist applies when only the GitHub repository was transferred and the original AWS account and EC2 instance are still in use. Checked through the GitHub API on 2026-09-17: the new owner ID is `58069249`, the repository ID is still `1340324828`, and the default branch is still `main`.
 
-同日核对到新仓库的 `AWS_ROLE_ARN` 已存在且值正确，并保留了名为 `mermer-ec2-readonly` 的只读 Deploy Key。这两项无需仅因转移而重建；尚未验证 EC2 私钥是否与该公钥匹配，也未修改 AWS 上的信任策略。
+On the same day, `AWS_ROLE_ARN` was confirmed to exist in the new repository with the correct value, and the read-only deploy key named `mermer-ec2-readonly` had been kept. Neither needs to be recreated just because of the transfer. Whether the private key on EC2 matches that public key has not yet been verified, and the trust policy on AWS has not been changed.
 
-| 位置 | 需要做什么 |
+| Where | What to do |
 |---|---|
-| 本地仓库文件 | 三个部署/认证脚本与信任策略 JSON 已更新为新所有者；提交并推送这些修改 |
-| 本地 Mac 的 origin | 改成新仓库地址，命令见下方 |
-| AWS IAM 部署角色 | 编辑现有角色的 **Trust relationships**，替换成更新后的完整 JSON |
-| 新仓库 Actions 变量 | 核对 `AWS_ROLE_ARN` 存在且值正确；同一个 AWS 角色无需改 ARN |
-| EC2 工作目录的 origin | 改成新地址，并获取 main 中的新认证脚本 |
-| EC2 的 GitHub 认证 | HTTPS 需要按新仓库路径重新保存凭据；SSH 检查原 Deploy Key 并复用已有密钥 |
-| GitHub 部署运行 | 配置完成后新建一次 Run workflow；不要重跑转移前的旧提交 |
+| Files in the local repository | The three deployment and authentication scripts and the trust policy JSON have been updated for the new owner; commit and push these changes |
+| origin on the local Mac | Change it to the new repository address, using the commands below |
+| AWS IAM deployment role | Edit the existing role's **Trust relationships** and replace it with the complete updated JSON |
+| Actions variables in the new repository | Check that `AWS_ROLE_ARN` exists and has the correct value; the same AWS role needs no change of ARN |
+| origin of the EC2 working directory | Change it to the new address and fetch the new authentication script from `main` |
+| GitHub authentication on EC2 | For HTTPS, the credential must be saved again for the new repository path; for SSH, check the original deploy key and reuse the existing key |
+| GitHub deployment run | When the setup is complete, start a new Run workflow; do not re-run an old commit from before the transfer |
 
-### A. 在 Mac 本地终端：更新 origin，提交并推送
+### A. In a terminal on the Mac: update origin, commit and push
 
 ```bash
 cd /Users/sushiqi/Java/IdeaProject/Q/DECO-3500-Team-07-Mermer-Coming
@@ -30,109 +30,109 @@ git remote set-url origin https://github.com/qinghuai999/DECO-3500-Team-07-Merme
 git remote -v
 ```
 
-这里选择 HTTPS，与此前本地 remote 的协议一致。确认要发布的修改后在 IDE 提交并推送到 main，或按分支保护规则通过 PR 合并。仅修改本地文件不会更新 EC2 和 AWS IAM。
+HTTPS is used here, the same protocol as the local remote used before. After confirming which changes to publish, commit in the IDE and push to `main`, or merge through a pull request if branch protection requires it. Changing local files alone does not update EC2 or AWS IAM.
 
-### B. 在 AWS 控制台：修改现有角色的信任策略
+### B. In the AWS console: change the trust policy of the existing role
 
-打开 **IAM → Roles → mermer-github-deploy → Trust relationships → Edit trust policy**，用本仓库 [`aws/github-trust-policy.json`](aws/github-trust-policy.json) 的完整内容替换并保存。
+Open **IAM → Roles → mermer-github-deploy → Trust relationships → Edit trust policy**, replace the contents with the complete [`aws/github-trust-policy.json`](aws/github-trust-policy.json) from this repository, and save.
 
-新策略中的两个允许值是：
+The two allowed values in the new policy are:
 
 ```text
 repo:qinghuai999/DECO-3500-Team-07-Mermer-Coming:ref:refs/heads/main
 repo:qinghuai999@58069249/DECO-3500-Team-07-Mermer-Coming@1340324828:ref:refs/heads/main
 ```
 
-旧所有者的 subject 必须被替换，不能只改仓库 URL。保留角色原来的 `MermerDeployEC2` 权限策略和 OIDC 提供商；同一 AWS 账号、区域、实例下，这些不需要重建。
+The old owner's subject must be replaced; changing only the repository URL is not enough. Keep the role's existing `MermerDeployEC2` permissions policy and the OIDC provider. With the same AWS account, region and instance, these do not need to be recreated.
 
-### C. 在新 GitHub 仓库：核对部署变量
+### C. In the new GitHub repository: check the deployment variable
 
-打开 **Settings → Secrets and variables → Actions → Variables**，确认：
+Open **Settings → Secrets and variables → Actions → Variables** and confirm:
 
 ```text
 AWS_ROLE_ARN = arn:aws:iam::081999475353:role/mermer-github-deploy
 ```
 
-若已存在且值正确，保持原样；缺失才新建。角色名称不需要改成 GitHub 用户名。
+If it already exists with the correct value, leave it as it is; create it only if it is missing. The role name does not need to change to match the GitHub username.
 
-### D. 在 EC2 Session Manager：更新远端和认证
+### D. In EC2 Session Manager: update the remote and the authentication
 
-先单独执行 `sudo -iu ec2-user`，然后按 [`DEPLOY-EC2.md` 的“仓库转移后的 EC2 更新”](DEPLOY-EC2.md#transfer-ec2) 更新 origin、运行目录中的脚本和 GitHub 认证。那里包含 HTTPS/SSH 两种具体命令，选择原来使用的一种即可。
+Run `sudo -iu ec2-user` on its own first, then follow [“Updating EC2 after the repository transfer” in `DEPLOY-EC2.md`](DEPLOY-EC2.md#transfer-ec2) to update origin, the scripts in the runtime directory, and the GitHub authentication. That section has the exact commands for both HTTPS and SSH; choose the one you used before.
 
-GitHub 转移会保留 Deploy Keys，因此用 SSH 时先检查新仓库 **Settings → Deploy keys**，通常可以复用原密钥；无需因为转移就删除并重新生成。[GitHub 转移说明](https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository)
+A GitHub transfer keeps deploy keys, so if you use SSH, first check **Settings → Deploy keys** in the new repository. The original key can usually be reused; there is no need to delete and regenerate it just because of the transfer. See [GitHub's notes on transferring a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/transferring-a-repository).
 
-HTTPS 凭据则由本项目脚本按仓库路径保存，原路径对应旧所有者，所以必须运行**新版**认证脚本重新保存；Token 本身也必须有读取新仓库的权限。
+HTTPS credentials are saved by this project's script per repository path, and the old path belongs to the old owner. You must therefore run the **new** authentication script to save the credential again, and the token itself must be able to read the new repository.
 
-### E. 新建一次部署
+### E. Start a new deployment
 
-到新仓库 **Actions → Deploy EC2 → Run workflow → main**。不要点旧失败运行的 Re-run：那会重新使用旧提交中的脚本。新运行会检查新提交、获取 AWS 权限并部署。
+In the new repository, go to **Actions → Deploy EC2 → Run workflow → main**. Do not click Re-run on an old failed run: that would use the scripts from the old commit again. A new run checks out the new commit, obtains AWS permissions and deploys.
 
-EC2 实例、公网 IP、DuckDNS、Caddy、Discord 应用及 Token、频道 ID、`bot.env`、Docker 网络和数据卷均不因这次 GitHub 转移而需要修改。仓库本地目录名也可以保持原样。独立部署缓存每次使用脚本中的新 URL 抓取，不需要删除缓存或数据卷。
+The EC2 instance, public IP, DuckDNS, Caddy, the Discord application and its token, the channel IDs, `bot.env`, the Docker network and the data volume do not need to change because of the GitHub transfer. The name of the local repository directory can also stay the same. The separate deployment cache is fetched from the new URL in the script each time, so neither the cache nor the data volume needs to be deleted.
 
-以下章节保留给首次搭建；已完成迁移清单后，直接使用“以后每次上线”。
+The following sections are kept for first-time setup. If you have completed the transfer checklist, go straight to “Every release from now on”.
 
-## 1. 把这些文件提交到 GitHub main
+## 1. Commit these files to main on GitHub
 
-在 IDE 中检查并提交 `.github/workflows/` 和 `scripts/`，推送到远端 main。不要提交 bot.env、Token、私钥或运行数据。如果 main 有保护规则，先提交分支再通过 PR 合并。
+In your IDE, check and commit `.github/workflows/` and `scripts/`, and push to the remote `main`. Do not commit `bot.env`, tokens, private keys or runtime data. If `main` has protection rules, commit to a branch first and merge through a pull request.
 
-这些文件只存在本地时，GitHub 不会显示新的部署按钮。第一次推送后，Actions 中的 **CI** 会自动运行。
+While these files exist only locally, GitHub does not show the new deployment button. After the first push, **CI** runs automatically under Actions.
 
-## 2. AWS 添加 GitHub 身份提供商（一次）
+## 2. Add the GitHub identity provider in AWS (once)
 
-在 AWS 控制台打开 **IAM → Identity providers**。如果已经有 `token.actions.githubusercontent.com`，打开它确认 Audience 包含 `sts.amazonaws.com`，直接复用。
+In the AWS console, open **IAM → Identity providers**. If `token.actions.githubusercontent.com` is already there, open it, confirm that the Audience includes `sts.amazonaws.com`, and reuse it.
 
-否则点 **Add provider**：
+Otherwise click **Add provider**:
 
-- Provider type：**OpenID Connect**
-- Provider URL：`https://token.actions.githubusercontent.com`
-- Audience：`sts.amazonaws.com`
-- 点击 **Add provider**。
+- Provider type: **OpenID Connect**
+- Provider URL: `https://token.actions.githubusercontent.com`
+- Audience: `sts.amazonaws.com`
+- Click **Add provider**.
 
-GitHub 用这个身份提供商取得短期 AWS 凭据，无需保存 AWS Access Key。[GitHub 官方配置说明](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws)
+GitHub uses this identity provider to obtain short-lived AWS credentials, so no AWS access key needs to be stored. See [GitHub's setup guide](https://docs.github.com/en/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws).
 
-## 3. 创建专门给 GitHub 部署用的 IAM Role（一次）
+## 3. Create an IAM role used only for GitHub deployments (once)
 
-打开 **IAM → Roles → Create role → Custom trust policy**：
+Open **IAM → Roles → Create role → Custom trust policy**:
 
-1. 用 [`aws/github-trust-policy.json`](aws/github-trust-policy.json) 的完整内容替换编辑框。
-2. 下一步先不添加宽泛的托管权限。
-3. Role name 填 **mermer-github-deploy**，创建角色。
-4. 打开新角色，选择 **Permissions → Add permissions → Create inline policy → JSON**。
-5. 粘贴 [`aws/github-deploy-permissions.json`](aws/github-deploy-permissions.json) 的完整内容。
-6. 策略名填 **MermerDeployEC2**，保存。
+1. Replace the contents of the editor with the complete [`aws/github-trust-policy.json`](aws/github-trust-policy.json).
+2. On the next step, do not add any broad managed permissions yet.
+3. Enter **mermer-github-deploy** as the role name and create the role.
+4. Open the new role and choose **Permissions → Add permissions → Create inline policy → JSON**.
+5. Paste the complete [`aws/github-deploy-permissions.json`](aws/github-deploy-permissions.json).
+6. Enter **MermerDeployEC2** as the policy name and save.
 
-这两个文件已按此前截图配置：AWS 账号 `081999475353`、区域 `ap-southeast-2`、实例 `i-0fb34ffbb056595e0`。操作时核对当前 AWS 账号。如果换账号或实例，需要同步调整策略和脚本中的配置。
+These two files are already configured from earlier screenshots: AWS account `081999475353`, region `ap-southeast-2`, instance `i-0fb34ffbb056595e0`. Check the current AWS account when you do this. If the account or the instance changes, the policies and the settings in the scripts must be changed to match.
 
-**EC2 继续使用原来的 `mermer-ec2-ssm` 角色。新角色不绑定到 EC2。** 原角色负责实例连接 SSM，新角色负责允许 GitHub 向这个实例发送部署命令。
+**EC2 keeps using its original `mermer-ec2-ssm` role. The new role is not attached to EC2.** The original role lets the instance connect to SSM; the new role allows GitHub to send deployment commands to this instance.
 
-信任策略只允许这个 GitHub 仓库的 main 分支，同时列出了 GitHub 的两种默认 subject 格式。仓库、所有者 ID 已从 GitHub 核对。不需要创建 GitHub Environment；如果以后增加 Environment，必须一起修改 OIDC subject。
+The trust policy only allows the `main` branch of this GitHub repository, and lists both of GitHub's default subject formats. The repository and owner IDs have been checked against GitHub. No GitHub Environment needs to be created; if an Environment is added later, the OIDC subject must be changed with it.
 
-发送命令权限只允许目标实例和 `AWS-RunShellScript`。查询/取消命令的 API 不支持资源级限制，因此这两项使用 `Resource: "*"` 并限制区域。[AWS 权限参考](https://docs.aws.amazon.com/service-authorization/latest/reference/list_ssm.html)
+The permission to send commands only allows the target instance and `AWS-RunShellScript`. The APIs for querying and cancelling commands do not support resource-level restrictions, so those two use `Resource: "*"` and are limited by region. See the [AWS permissions reference](https://docs.aws.amazon.com/service-authorization/latest/reference/list_ssm.html).
 
-## 4. GitHub 添加一个变量（一次）
+## 4. Add one variable on GitHub (once)
 
-打开**项目仓库**的 Settings，不是个人账号 Settings：
+Open the Settings of the **project repository**, not your personal account settings:
 
 **Settings → Secrets and variables → Actions → Variables → New repository variable**
 
-- Name：`AWS_ROLE_ARN`
-- Value：`arn:aws:iam::081999475353:role/mermer-github-deploy`
+- Name: `AWS_ROLE_ARN`
+- Value: `arn:aws:iam::081999475353:role/mermer-github-deploy`
 
-如果创建角色时选了自定义 path，请使用 IAM 页面实际显示的 Role ARN。如果你没有仓库 Settings 权限，请让仓库管理员完成这一步。这里是普通变量，不需要填 GitHub 密码、Token 或 Discord Token。
+If you chose a custom path when creating the role, use the role ARN that the IAM page actually shows. If you do not have access to the repository's Settings, ask a repository administrator to do this step. This is an ordinary variable; do not enter a GitHub password, a token or the Discord token here.
 
-## 5. EC2 检查一次 GitHub 认证和现有配置
+## 5. Check the GitHub authentication and the existing setup on EC2 once
 
-通过你现在使用的 Session Manager 打开 EC2 终端，先单独执行：
+Open the EC2 terminal through the Session Manager you already use, and run this on its own first:
 
 ```bash
 sudo -iu ec2-user
 ```
 
-本方案依赖现有 Docker、Caddy、`mermer-net` 网络和 `mermer-runtime/bot.env`。**AWS 的临时身份用于控制 EC2；EC2 拉取私有 GitHub 仓库仍然需要 GitHub 读取凭据。**
+This approach relies on the existing Docker, Caddy, the `mermer-net` network and `mermer-runtime/bot.env`. **The temporary AWS identity is used to control EC2; EC2 still needs a GitHub read credential to pull the private repository.**
 
-如果已为**当前新仓库路径**配置过 `setup-github-auth.sh ssh/https`，可以沿用。若凭据是在转移前配置的，先完成本页迁移清单；尚未配置则按照 [`DEPLOY-EC2.md`](DEPLOY-EC2.md) 的“第一次安装”和“一次性配置认证”完成一次。
+If `setup-github-auth.sh ssh/https` has already been set up for the **current new repository path**, keep using it. If the credential was set up before the transfer, complete the transfer checklist on this page first. If it has not been set up at all, follow “First installation” and “One-time authentication setup” in [`DEPLOY-EC2.md`](DEPLOY-EC2.md) once.
 
-可执行以下只读检查，均不会输出 Token：
+The following read-only checks can be run; none of them prints a token:
 
 ```bash
 test -s /home/ec2-user/mermer-runtime/bot.env && echo 'bot.env exists'
@@ -141,40 +141,40 @@ sudo docker inspect mermer-bot --format '{{range .Mounts}}{{println .Type .Name 
 curl -fsS https://mermerteam07.duckdns.org/; printf '\n'
 ```
 
-挂载输出应含 `volume mermer-data /app/data`，HTTP 应返回 `ok`。如果挂载不匹配，先保留旧容器并确认现有数据位置；部署脚本会拒绝切换数据存储，避免丢失状态。
+The mount output should include `volume mermer-data /app/data`, and the HTTP check should return `ok`. If the mount does not match, keep the old container and confirm where the existing data is first. The deployment script refuses to switch data storage, to avoid losing state.
 
-CI/CD 每次自动传送该提交中的部署脚本到 EC2，不需要每次手动复制脚本，也不需要开放 SSH 22 端口。
+CI/CD sends the deployment script from that commit to EC2 on every run. You do not need to copy the script by hand each time, and SSH port 22 does not need to be open.
 
-## 以后每次上线
+## Every release from now on
 
-1. 开发完成，把需要上线的代码合并或推送到 GitHub **main**。
-2. 打开仓库 **Actions → Deploy EC2 → Run workflow**。
-3. Branch 选择 **main**，点击绿色 **Run workflow**。
-4. 打开这次运行，查看 **tests** 和 **Deploy tested main through SSM** 两项结果。
+1. When development is finished, merge or push the code to be released to **main** on GitHub.
+2. Open the repository's **Actions → Deploy EC2 → Run workflow**.
+3. Choose **main** as the branch and click the green **Run workflow**.
+4. Open the run and look at the results of **tests** and **Deploy tested main through SSM**.
 
-绿色表示测试和部署 HTTP 检查通过。运行摘要会显示部署的 commit、实例和 SSM Command ID。最后在 Discord 用 `/social` 验证实际交互、语音成员读取和按钮权限。
+Green means that the tests and the HTTP check after deployment passed. The run summary shows the deployed commit, the instance and the SSM Command ID. Finally, use `/social` in Discord to verify the real interactions, the reading of voice channel members and the button permissions.
 
-部署会短暂停止机器人，正在进行的交互可能中断。它会保留旧容器，使用唯一备份名，避免之前的重名问题；新容器启动或 HTTP 检查失败时尝试恢复旧容器。数据卷继续共用，回滚不撤销数据变化。构建与测试使用相同提交，但 npm/Docker 外部依赖仍可能影响构建；这版不是预构建镜像制品发布。
+A deployment stops the bot briefly, and interactions in progress may be interrupted. It keeps the old container under a unique backup name, which avoids the earlier name clashes. If the new container fails to start or fails the HTTP check, it tries to restore the old container. The data volume stays shared, so a rollback does not undo data changes. The build and the tests use the same commit, but external npm and Docker dependencies can still affect the build; this version does not release a pre-built image artefact.
 
-## 红色失败时看哪里
+## Where to look when a run fails
 
-| 出错位置或信息 | 操作 |
+| Where it failed, or the message | What to do |
 |---|---|
-| tests | 查看失败的测试；线上容器尚未被替换 |
-| AWS_ROLE_ARN missing | 检查变量是否建在该仓库的 Actions → Variables |
-| Get temporary AWS credentials / AssumeRoleWithWebIdentity | 检查 IAM 提供商、角色 ARN、信任策略，以及是否选择 main |
-| SendCommand AccessDenied | 检查新部署角色的 inline policy |
-| InvalidInstanceId / DeliveryTimedOut | 确认实例运行，且 SSM 显示 Online；检查目标区域和实例 ID |
-| Git authentication failed | 在 EC2 更新读取仓库的 Deploy Key 或 Token |
-| main changed after this workflow started | 本次测试后 main 又有新提交；重新点 Run workflow |
-| Existing container must mount… | 确认原状态目录并迁移数据后再部署，不要先删旧容器 |
-| Health checks failed | 查看日志中的恢复结果，并检查旧机器人能否正常访问 |
+| tests | Look at the failing test; the live container has not been replaced |
+| AWS_ROLE_ARN missing | Check that the variable was created under this repository's Actions → Variables |
+| Get temporary AWS credentials / AssumeRoleWithWebIdentity | Check the IAM provider, the role ARN, the trust policy, and that `main` was selected |
+| SendCommand AccessDenied | Check the inline policy of the new deployment role |
+| InvalidInstanceId / DeliveryTimedOut | Confirm that the instance is running and shows as Online in SSM; check the target region and instance ID |
+| Git authentication failed | Update the deploy key or token that EC2 uses to read the repository |
+| main changed after this workflow started | `main` received a new commit after this test run; click Run workflow again |
+| Existing container must mount… | Confirm the original state directory and migrate the data before deploying; do not delete the old container first |
+| Health checks failed | Read the restore result in the log, and check whether the old bot is reachable |
 
-不要在切换容器期间点 Cancel。监控失败/取消时脚本会尝试取消 SSM 命令，但强制终止、断电等情况下不能保证完成回滚；先在 **AWS Systems Manager → Run Command** 根据 Command ID 检查结果，再部署下一次。若发送命令时网络断开、没有拿到 Command ID，也先检查 Run Command 列表，不能假定 EC2 完全没执行。[SSM 取消语义](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_CancelCommand.html)
+Do not click Cancel while the container is being switched. When monitoring fails or is cancelled, the script tries to cancel the SSM command, but after a forced termination or a power loss a rollback cannot be guaranteed. First check the result under **AWS Systems Manager → Run Command** using the Command ID, then start the next deployment. If the network dropped while the command was being sent and no Command ID was returned, also check the Run Command list first; do not assume that EC2 ran nothing. See [how SSM cancellation works](https://docs.aws.amazon.com/systems-manager/latest/APIReference/API_CancelCommand.html).
 
-GitHub 会串行安排部署，EC2 也有部署锁。脚本保留旧镜像和停止的备份容器，不自动清理数据；多次部署后需定期查看磁盘并清理确认不再需要的备份。
+GitHub queues deployments one after another, and EC2 also has a deployment lock. The script keeps old images and stopped backup containers and does not clean up data automatically. After many deployments, check the disk from time to time and remove backups that are confirmed to be no longer needed.
 
-## 本地验证
+## Verifying locally
 
 ```bash
 cd discord-example-app
@@ -185,4 +185,4 @@ bash -n scripts/deploy-main.sh scripts/setup-github-auth.sh
 python3 -m unittest discover -s scripts/test -p 'test_*.py' -v
 ```
 
-部署测试使用模拟 Git、Docker、HTTP 和 AWS 调用，不会操作真实 EC2 或发送 Discord 消息。真正的 AWS 权限和网络连通性，需要完成上述一次性配置后的首次工作流运行才能确认。
+The deployment tests use stand-ins for Git, Docker, HTTP and AWS calls. They do not operate a real EC2 instance or send Discord messages. Real AWS permissions and network connectivity can only be confirmed by the first workflow run after the one-time setup above.
