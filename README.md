@@ -1,6 +1,6 @@
 <!--
 TODO before submission (delete this comment when done):
-1. Add links to the poster, pitch and promotional material in "Start here".
+1. Add links to the pitch and promotional material in "Start here".
 2. Replace "in progress" with links once the Wiki pages exist.
 -->
 
@@ -26,7 +26,7 @@ Together they cover **Leave — Express — Decide**.
 
 | What | Where | Status |
 |---|---|---|
-| Poster (A2) | To be linked here | In progress |
+| Poster (A2) | [Exhibition poster (PDF)](Team%20Document/05-Visual%20Material/Pally%20Exhibition%20Poster%20Final.pdf) | Available |
 | Pitch and promotional material | To be linked here | In progress |
 | Try the prototype | [Try the prototype](#try-the-prototype) below | Available |
 | Design Process Overview | [Wiki](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki) | In progress |
@@ -102,7 +102,8 @@ Our process documentation is on the [Wiki](https://github.com/qinghuai999/DECO-3
 | Prototype | [Prototype](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/Prototype) | [`discord-example-app/`](discord-example-app) |
 | Evaluation: plan | [User Testing Plan](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/User-Testing-Plan) | [Test plan](Team%20Document/06-User%20Test/Test%20Plan.pdf) |
 | Evaluation: findings | [User Testing Findings](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/User-Testing-Findings) | [Thematic analysis](Team%20Document/06-User%20Test/Pally_User_Testing_Thematic_Analysis.md); transcripts [P01](Team%20Document/06-User%20Test/P01/P01_Transcripts.md), [P02](Team%20Document/06-User%20Test/P02/P02-Interview-Transcripts.md), [P03](Team%20Document/06-User%20Test/P03/P03-Interview-Transcript.md) |
-| Evaluation: heuristics | [Groupware Heuristics Evaluation](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/Groupware-Heuristics-Evaluation) | [Coding sheets](Team%20Document/06-User%20Test/Groupware_Heuristics_Evaluation) |
+| Evaluation: groupware heuristics | [Groupware Heuristics Evaluation](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/Groupware-Heuristics-Evaluation) | [Coding sheets](Team%20Document/06-User%20Test/Groupware_Heuristics_Evaluation) |
+| Evaluation: expert heuristic evaluation | [Heuristic Evaluation Plan](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/Heuristic-Evaluation-Plan) and [Results](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki/Heuristic-Evaluation-Results) | [Plan, task sheets and analysis](Team%20Document/07-Heuristic%20Evaluation) |
 | Ethics | In progress | |
 | Design process overview | In progress | |
 
