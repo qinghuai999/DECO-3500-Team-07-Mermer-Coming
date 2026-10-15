@@ -1,7 +1,6 @@
 <!--
 TODO before submission (delete this comment when done):
-1. Add links to the pitch and promotional material in "Start here".
-2. Replace "in progress" with links once the Wiki pages exist.
+1. Replace "in progress" with links once the Wiki pages exist.
 -->
 
 # Pally — playful social tools for gaming groups on Discord
@@ -27,7 +26,7 @@ Together they cover **Leave — Express — Decide**.
 | What | Where | Status |
 |---|---|---|
 | Poster (A2) | [Exhibition poster (PDF)](Team%20Document/05-Visual%20Material/Pally%20Exhibition%20Poster%20Final.pdf) | Available |
-| Pitch and promotional material | To be linked here | In progress |
+| Pamphlet | [Outside](Team%20Document/05-Visual%20Material/Pamphlet-outside.pdf) and [inside](Team%20Document/05-Visual%20Material/Pamphlet-inside.pdf) (PDF) | Available |
 | Try the prototype | [Try the prototype](#try-the-prototype) below | Available |
 | Design Process Overview | [Wiki](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki) | In progress |
 | Ethical Considerations | [Wiki](https://github.com/qinghuai999/DECO-3500-Team-07-Mermer-Coming/wiki) | In progress |
