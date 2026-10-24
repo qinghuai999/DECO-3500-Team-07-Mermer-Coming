@@ -1,10 +1,12 @@
-# Design Process Overview — draft for review
-
-> This draft has an English version followed by a sentence-by-sentence Chinese translation. Please review and edit it. The wiki version will be written from the English text after the team approves it.
+# Design Process Overview
+**Team 7 Mermer Coming**  
+Arthur Zhou 49269039  
+Kiki Su 48771058  
+Jeric Zhang 49554799  
+Yingzhi Xiao 48794525  
+ping Cheng 49164714  
 
 ---
-
-# English version
 
 ## Poster, pamphlet and prototype
 
