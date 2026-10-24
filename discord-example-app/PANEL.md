@@ -4,18 +4,18 @@ This page covers the Discord side of running Pally: channels, permissions, confi
 
 ## How the panel works
 
-- Any member types `/social` in the team's text channel. The command is acknowledged privately, and the panel is sent as an ordinary bot message that does not show the caller, quote the command or mention the user.
+- Any member types `/social` in the configured channel; in our server, the chat of the Game voice channel. The command is acknowledged privately, and the panel is sent as an ordinary bot message that does not show the caller, quote the command or mention the user.
 - The panel has three buttons: **Random Pick**, **Trait Picker** and **Excuse Generator**.
 - Each call sends a new panel at the bottom of the channel. Old panels are not deleted and keep working.
 - “Anonymous” means that the person who triggered something is not shown to other channel members. Discord and the bot still know who it was.
 
 ## Channels
 
-Pally is configured for one server, one text channel and one voice channel.
+Pally is configured for one server, one text channel and one voice channel. The text channel can be the voice channel's own chat, because every Discord voice channel has one. In our server `SOCIAL_TEXT_CHANNEL_ID`, `GAME_VOICE_CHANNEL_ID` and `RESULT_CHANNEL_ID` all point to the Game voice channel, so everything happens in its chat.
 
 | Channel | Setting | Used for |
 |---|---|---|
-| Text channel | `SOCIAL_TEXT_CHANNEL_ID` | The panel, and all Trait Picker and Random Pick messages. These two tools only work from this channel |
+| Text channel, or a voice channel's chat | `SOCIAL_TEXT_CHANNEL_ID` | The panel, and all Trait Picker and Random Pick messages. These two tools only work from this channel |
 | Voice channel | `GAME_VOICE_CHANNEL_ID` | Defines who is playing. Trait Picker and Random Pick only accept players who are in this voice channel |
 
 Excuse Generator works in any channel of the server and for any member.
@@ -32,7 +32,7 @@ To copy an ID, turn on Discord User Settings → Advanced → Developer Mode, th
 | Players | Text channel | Use Application Commands |
 | Players | Voice channel | Connect |
 
-Administrator does not need to be granted.
+If the panel is used in a voice channel's chat, the text-channel permissions above are set on that voice channel. Administrator does not need to be granted.
 
 Read Message History lets the bot read a result card back before adding a reply to it, and is required by the pinned-panel command, which searches the channel for an existing panel. Without it, replies can still be posted.
 
@@ -45,7 +45,7 @@ Set these in `.env` locally, or in `bot.env` on the server. `.env.sample` lists 
 | `APP_ID`, `DISCORD_TOKEN`, `PUBLIC_KEY` | Yes | The Discord application's ID, bot token and public key |
 | `GUILD_ID` | Yes | The server |
 | `GAME_VOICE_CHANNEL_ID` | Yes | The voice channel whose members take part |
-| `SOCIAL_TEXT_CHANNEL_ID` | Yes | The text channel for the panel and results |
+| `SOCIAL_TEXT_CHANNEL_ID` | Yes | The channel for the panel and results; it can be a voice channel's own chat |
 | `STATE_DIR` | No | Where rotation history is stored. Defaults to `./data`; in Docker it is `/app/data` on the `mermer-data` volume |
 | `RESULT_CHANNEL_ID` | No | Where Excuse Generator posts a sent excuse. If empty, it posts in the channel where the excuse was opened |
 | `PANEL_CHANNEL_ID` | Only for a pinned panel | The channel in which `npm run panel` publishes |
@@ -77,7 +77,7 @@ A team that wants the panel in a fixed place can publish one pinned panel:
 sudo docker exec mermer-bot npm run panel
 ```
 
-- The command sends a panel message in `PANEL_CHANNEL_ID` and pins it. That channel must be an ordinary text channel in `GUILD_ID`.
+- The command sends a panel message in `PANEL_CHANNEL_ID` and pins it. That channel must be an ordinary text channel in `GUILD_ID`, so a pinned panel is not available when the tools are used in a voice channel's chat, as in our server. Use `/social` there instead.
 - **Set `PANEL_CHANNEL_ID` to the same channel as `SOCIAL_TEXT_CHANNEL_ID`.** In any other channel only Excuse Generator works; Trait Picker and Random Pick tell the player to use the configured text channel.
 - Running it again finds this bot's existing panel in the channel and updates it instead of creating a second one. To update one exact message, pass the ID that the command printed:
 
@@ -97,7 +97,7 @@ Use two or three accounts. The accounts that test Random Pick and Trait Picker m
 
 **Panel**
 
-1. Type `/social` in the text channel. You get a private confirmation, and the panel appears.
+1. Type `/social` in the configured channel. You get a private confirmation, and the panel appears.
 2. From another account, confirm that nothing shows who brought up the panel.
 
 **Excuse Generator**

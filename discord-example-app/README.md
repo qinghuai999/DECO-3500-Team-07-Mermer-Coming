@@ -1,6 +1,6 @@
 # Pally Discord bot
 
-This directory contains the prototype: a Discord bot with three tools, **Random Pick**, **Trait Picker** and **Excuse Generator**. The Discord application is named Mermer2.0.
+This directory contains the prototype: a Discord bot with three tools, **Random Pick**, **Trait Picker** and **Excuse Generator**. In Discord the bot appears as Pally.
 
 - To try the bot, or for an overview of the project, see the [repository README](../README.md).
 - To set up channels, permissions and configuration in Discord, see [PANEL.md](./PANEL.md).
@@ -11,6 +11,8 @@ This directory contains the prototype: a Discord bot with three tools, **Random 
 ### The panel
 
 `/social` brings up the three-button panel in the current channel without showing other channel members who asked for it. Trait Picker and Random Pick can only be used by members of the configured game voice channel, from the configured text channel. Excuse Generator can be used by anyone in the server.
+
+The configured text channel can be a voice channel's own chat. In our server the panel, all results and every sent excuse are in the chat of the Game voice channel.
 
 When Trait Picker or Random Pick starts successfully, the person who clicked gets no private confirmation: the public message is the confirmation. A note that only the clicker can see is sent only when the tool is already in progress (including near-simultaneous clicks), when the clicker is not in the voice channel or not in the configured text channel, or when the start fails.
 
