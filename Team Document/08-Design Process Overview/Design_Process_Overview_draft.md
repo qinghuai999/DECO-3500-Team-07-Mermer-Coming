@@ -3,8 +3,8 @@
 Arthur Zhou 49269039  
 Kiki Su 48771058  
 Jeric Zhang 49554799  
-Yingzhi Xiao 48794525  
-ping Cheng 49164714  
+Elsie Xiao 48794525  
+Ping Cheng 49164714  
 
 ---
 
